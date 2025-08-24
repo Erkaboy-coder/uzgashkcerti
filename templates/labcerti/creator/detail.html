@@ -1,0 +1,115 @@
+{% extends "labcerti/base.html" %}
+{% load static %}
+
+{% block title %}Sertifikat {{ cert.certificate_number }}{% endblock %}
+{% block page_title %}Sertifikat tafsilotlari{% endblock %}
+{% block breadcrumb %}Sertifikat tafsilotlari{% endblock %}
+
+{% block content %}
+<div class="card shadow-lg border-0 rounded-4 mt-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-certificate me-2"></i>Sertifikat {{ cert.certificate_number }}</h5>
+        <a href="{% url 'creator:dashboard' %}" class="btn btn-light btn-sm shadow-sm rounded-3">
+            <i class="fas fa-arrow-left me-1"></i> Orqaga
+        </a>
+    </div>
+    <div class="card-body p-4">
+
+        <div class="certificate-preview position-relative" 
+             style="background: url('{% static "images/certificate_bg.png" %}') no-repeat center/cover; 
+                    width: 100%; max-width: 900px; height: 750px; margin: 0 auto; 
+                    border: 1px solid #ccc; padding: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+
+            <!-- Header text -->
+            <div style="text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 20px;">
+                O‘ZBEKISTON RESPUBLIKASIDA O‘LCHASHLARNING YAGONA BIRLIKDA BO'LISHINI TA’MINLASH TIZIMI
+            </div>
+
+            <!-- Logos -->
+            <div style="position: absolute; top: 20px; left: 40px;">
+                <img src="{% static 'assets/logo/logo2.png' %}" alt="Logo" style="height: 80px;">
+            </div>
+            <div style="position: absolute; top: 20px; right: 40px;">
+                <img src="{% static 'assets/logo/image.png' %}" alt="Logo" style="height: 80px;">
+            </div>
+
+            <!-- Sertifikat raqami -->
+            <div style="text-align: center; margin-top: 80px; font-size: 24px; font-weight: bold;">
+                Guvohnoma № {{ cert.certificate_number }}
+            </div>
+
+            <!-- Owner va device - ikki ustun, o'rtada ':' belgisi -->
+            <div style="display: table; width: 100%; margin-top: 40px; font-size: 18px; text-align: left;">
+                <div style="display: table-row;">
+                    <div style="display: table-cell; text-align: right; width: 40%;">Kimga tegishli</div>
+                    <div style="display: table-cell; text-align: center; width: 5%;">:</div>
+                    <div style="display: table-cell; text-align: left; width: 55%; font-weight: bold;">{{ cert.owner_name }} ({{ cert.owner_inn }})</div>
+                </div>
+                <div style="display: table-row;">
+                    <div style="display: table-cell; text-align: right; width: 40%;">O'lchash vositasi</div>
+                    <div style="display: table-cell; text-align: center; width: 5%;">:</div>
+                    <div style="display: table-cell; text-align: left; width: 55%; font-weight: bold;">{{ cert.device_name }}</div>
+                </div>
+                <div style="display: table-row;">
+                    <div style="display: table-cell; text-align: right; width: 40%;">Zavod raqami</div>
+                    <div style="display: table-cell; text-align: center; width: 5%;">:</div>
+                    <div style="display: table-cell; text-align: left; width: 55%; font-weight: bold;">{{ cert.device_serial_numbers }}</div>
+                </div>
+            </div>
+
+            <!-- Qo'shimcha maydonlar -->
+            <div style="text-align: center; margin-top: 30px; font-size: 16px;">
+                <p>Qiyoslash sanasi: <strong>{{ cert.comparison_date|date:"d.m.Y" }}</strong></p>
+                <p>Qiyoslash uslubiyati: <strong>{{ cert.comparison_methodology_doc }}</strong></p>
+                <p>Etalonlar va vositalar: <strong>{{ cert.standards_used }}</strong></p>
+                <p>Metrologiya xizmati: <strong>{{ cert.service_provider_name }}</strong></p>
+                <p>Qiyoslovchi: <strong>{{ cert.metrologist_name }}</strong></p>
+                <p>O'lchash vositalarini tayyorlovchi: <strong>{{ cert.manufacturer }}</strong></p>
+                <p>Mamlakat: <strong>{{ cert.origin_country }}</strong></p>
+                <p>Parametrlar va o'lchashlar: <strong>{{ cert.measurement_range }}</strong></p>
+                <p>Xatolik chegaralari: <strong>{{ cert.error_limit }}</strong></p>
+            </div>
+
+            <!-- Belgi -->
+            <div style="text-align: center; margin-top: 30px; font-size: 14px; font-weight: bold;">
+                Mazkur guvohnomani qalbakilashtirish - qonunga muvofiq javobgarlikka tortiladi.
+            </div>
+
+            <!-- QR code -->
+            <div style="position: absolute; bottom: 40px; right: 40px;">
+                {% if cert.qr_code_image %}
+                    <img src="{{ cert.qr_code_image.url }}" alt="QR code" style="height: 100px; width: 100px;">
+                {% endif %}
+            </div>
+
+            <!-- Tasdiqlovchi va sana -->
+            <div style="position: absolute; bottom: 40px; left: 40px; font-size: 14px;">
+                {% if cert.status == 'approved' and cert.approved_by %}
+                    Tasdiqladi: {{ cert.approved_by.user.get_full_name }} <br>
+                    Sana: {{ cert.approved_at|date:"d.m.Y" }}
+                {% elif cert.status == 'rejected' and cert.rejected_by %}
+                    Rad etdi: {{ cert.rejected_by.user.get_full_name }} <br>
+                    Sana: {{ cert.rejected_at|date:"d.m.Y" }}
+                {% else %}
+                    Yaratdi: {{ cert.created_by.user.get_full_name }} <br>
+                    Sana: {{ cert.created_at|date:"d.m.Y" }}
+                {% endif %}
+            </div>
+
+        </div>
+
+        <div class="mt-4 text-center">
+            <a href="{% url 'creator:edit' cert.id %}" class="btn btn-secondary me-2">
+                <i class="fas fa-edit me-1"></i> Tahrirlash
+            </a>
+            {% if cert.certificate_file %}
+                <a href="{{ cert.certificate_file.url }}" target="_blank" class="btn btn-primary">
+                    <i class="fas fa-file-pdf me-1"></i> PDF ko'rish
+                </a>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+bundagi chegarasi qolsin

@@ -20,10 +20,10 @@ class OrganizationAdmin(admin.ModelAdmin):
 @admin.register(Certificate)
 class CertificateAdmin(admin.ModelAdmin):
     list_display = (
-        "id", "certificate_number", "owner",
+        "id", "certificate_number", "owner_inn",
         "comparison_date", "valid_until_date", "status"
     )
     list_filter = ("status", "comparison_date", "valid_until_date")
-    search_fields = ("certificate_number", "owner__name", "device_name")
+    search_fields = ("certificate_number", "owner_inn", "device_name")
     ordering = ("-created_at",)
     list_display_links = ("id","certificate_number")

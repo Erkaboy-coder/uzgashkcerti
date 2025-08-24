@@ -1,0 +1,99 @@
+{% extends "labcerti/base.html" %}
+{% load widget_tweaks %}
+{% block title %}Profil ma'lumotlari{% endblock %}
+{% block breadcrumb %}Profil{% endblock %}
+{% block page_title %}Profil ma'lumotlari{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white d-flex align-items-center">
+                <h5 class="mb-0">Shaxsiy ma'lumotlar</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6 border-end pe-4">
+                            {% for field in user_form %}
+                                <div class="mb-3">
+                                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                    {{ field|add_class:"form-control" }} {% if field.help_text %}
+                                        <div class="form-text">{{ field.help_text }}</div>
+                                    {% endif %}
+                                    {% for error in field.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div class="col-md-6 ps-4">
+                            {% for field in profile_form %}
+                                <div class="mb-3">
+                                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                                    {{ field|add_class:"form-control" }} {% if field.help_text %}
+                                        <div class="form-text">{{ field.help_text }}</div>
+                                    {% endif %}
+                                    {% for error in field.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                            <div class="mb-3">
+                                <label class="form-label">Foydalanuvchi roli</label>
+                                <p class="form-control-plaintext fw-bold">
+                                  <span class="badge bg-secondary">{{ user_profile_instance.get_role_display }}</span>
+                                </p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Faollik holati</label>
+                                <p class="form-control-plaintext fw-bold">
+                                  {% if user_profile_instance.status == 'active' %}
+                                    <span class="badge bg-success">{{ user_profile_instance.get_status_display }}</span>
+                                  {% else %}
+                                    <span class="badge bg-danger">{{ user_profile_instance.get_status_display }}</span>
+                                  {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" name="profile_form_submit" class="btn btn-primary w-100 mt-3">Yangilash</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">Parolni o'zgartirish</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {% for field in password_form %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                            {{ field|add_class:"form-control" }} {% if field.help_text %}
+                                <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="invalid-feedback d-block">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                    <button type="submit" name="password_form_submit" class="btn btn-warning w-100 mt-3">Parolni o'zgartirish</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

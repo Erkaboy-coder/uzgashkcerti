@@ -5,10 +5,8 @@ from . import views
 app_name = 'creator'
 
 urlpatterns = [
-    path('', views.dashboard, name='all'),
-    path('sent/', views.dashboard, {'status_filter': 'pending'}, name='sent'),
-    path('approved/', views.dashboard, {'status_filter': 'approved'}, name='approved'),
-    path('rejected/', views.dashboard, {'status_filter': 'rejected'}, name='rejected'),
+    path('', views.dashboard, name='dashboard'),
+    path('dashboard/<str:status>/', views.dashboard, name='dashboard_status'),  # draft, pending, approved, rejected
 
     path('certificate/<int:pk>/', views.certificate_detail, name='detail'),
     path('certificate/<int:pk>/edit/', views.edit_certificate, name='edit'),

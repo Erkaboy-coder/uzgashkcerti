@@ -12,70 +12,83 @@ from django.utils.safestring import mark_safe
 from django.db.models import Q
 from .forms import UserForm, UserProfileForm
 
-# views.py
-@login_required
-def index(request):
-    user_profile = get_object_or_404(UserProfile, user=request.user)
+from django.core.paginator import Paginator
 
-    total_certificates_count = 0
-    pending_certificates_count = 0
-    approved_certificates_count = 0 # Yangi o'zgaruvchi
-    rejected_certificates_count = 0
-    monthly_data = {'labels': [], 'data': []}
-    
-    if user_profile.role == 'creator':
-        queryset = Certificate.objects.filter(created_by=user_profile)
-        pending_certificates_count = queryset.filter(status='pending').count()
-        approved_certificates_count = queryset.filter(status='approved').count() # Qo'shilgan qator
-        rejected_certificates_count = queryset.filter(status='rejected').count()
-        total_certificates_count = queryset.count()
-    
-    elif user_profile.role == 'approver':
-        # Yangi (pending) sertifikatlarni approved_by maydoni bo'sh bo'lganlar sifatida hisoblaymiz.
-        pending_certificates_count = Certificate.objects.filter(status='pending', approved_by__isnull=True).count()
-        
-        # O'zi tasdiqlagan yoki rad etgan sertifikatlar
-        approved_certificates_count = Certificate.objects.filter(approved_by=user_profile, status='approved').count()
-        rejected_certificates_count = Certificate.objects.filter(approved_by=user_profile, status='rejected').count()
+# @login_required
+# def index(request):
+#     user_profile = get_object_or_404(UserProfile, user=request.user)
 
-        # Umumiy sertifikatlar soni barchasining yig'indisi
-        total_certificates_count = pending_certificates_count + approved_certificates_count + rejected_certificates_count
+#     total_certificates_count = 0
+#     draft_certificates_count = 0
+#     pending_certificates_count = 0
+#     approved_certificates_count = 0
+#     rejected_certificates_count = 0
+#     monthly_data = {'labels': [], 'data': []}
 
-        # Grafik uchun ma'lumotlar. Barcha `pending` va o'zi tasdiqlagan/rad etgan sertifikatlarni olamiz.
-        queryset = Certificate.objects.filter(
-            Q(status='pending', approved_by__isnull=True) | Q(approved_by=user_profile)
-        )
+#     if user_profile.role == 'creator':
+#         queryset = Certificate.objects.filter(created_by=user_profile)
+#         draft_certificates_count = queryset.filter(status='draft').count()
+#         pending_certificates_count = queryset.filter(status='pending').count()
+#         approved_certificates_count = queryset.filter(status='approved').count()
+#         rejected_certificates_count = queryset.filter(status='rejected').count()
+#         total_certificates_count = queryset.count()
+#         template = 'labcerti/creator/dashboard.html'
 
-    # Oylar kesimida statistikani olish
-    monthly_data_queryset = queryset.annotate(
-        month=ExtractMonth('created_at'),
-        year=ExtractYear('created_at')
-    ).values('year', 'month').annotate(
-        count=Count('id')
-    ).order_by('year', 'month')
+#     elif user_profile.role == 'approver':
+#         draft_certificates_count = Certificate.objects.filter(status='draft').count()
+#         pending_certificates_count = Certificate.objects.filter(status='pending', approved_by__isnull=True).count()
+#         approved_certificates_count = Certificate.objects.filter(approved_by=user_profile, status='approved').count()
+#         rejected_certificates_count = Certificate.objects.filter(approved_by=user_profile, status='rejected').count()
+#         total_certificates_count = draft_certificates_count + pending_certificates_count + approved_certificates_count + rejected_certificates_count
 
-    labels = []
-    data = []
-    for entry in monthly_data_queryset:
-        labels.append(f"{entry['year']}-{entry['month']:02d}")
-        data.append(entry['count'])
+#         queryset = Certificate.objects.filter(
+#             Q(status='draft') | Q(status='pending', approved_by__isnull=True) | Q(approved_by=user_profile)
+#         )
+#         template = 'labcerti/approver/dashboard.html'
 
-    monthly_data = {
-        'labels': labels,
-        'data': data
-    }
-    
-    context = {
-        'total_certificates_count': total_certificates_count,
-        'sent_certificates_count': pending_certificates_count,
-        'approved_certificates_count': approved_certificates_count, # Tasdiqlanganlar soni qo'shildi
-        'rejected_certificates_count': rejected_certificates_count,
-        'monthly_data': mark_safe(json.dumps(monthly_data))
-    }
+#     # Grafik uchun ma'lumot
+#     monthly_data_queryset = queryset.annotate(
+#         month=ExtractMonth('created_at'),
+#         year=ExtractYear('created_at')
+#     ).values('year', 'month').annotate(
+#         count=Count('id')
+#     ).order_by('year', 'month')
 
-    return render(request, 'labcerti/index.html', context)
+#     labels = []
+#     data = []
+#     for entry in monthly_data_queryset:
+#         labels.append(f"{entry['year']}-{entry['month']:02d}")
+#         data.append(entry['count'])
+
+#     monthly_data = {
+#         'labels': labels,
+#         'data': data
+#     }
+
+#     # Paginator
+#     paginator = Paginator(queryset, 10)  # har bir sahifada 10 ta sertifikat
+#     page_number = request.GET.get('page')
+#     page_obj = paginator.get_page(page_number)
+
+#     context = {
+#         'total_certificates_count': total_certificates_count,
+#         'drafts_count': draft_certificates_count,
+#         'pending_count': pending_certificates_count,
+#         'approved_count': approved_certificates_count,
+#         'rejected_count': rejected_certificates_count,
+#         'monthly_data': mark_safe(json.dumps(monthly_data)),
+#         'certificates': page_obj,  # paginator bilan sahifalangan ro'yxat
+#     }
+
+#     return render(request, template, context)
 
 
+
+
+
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+from django.shortcuts import render, redirect, get_object_or_404
 
 def login_page(request):
     # Agar foydalanuvchi allaqachon tizimga kirgan bo'lsa
@@ -83,15 +96,18 @@ def login_page(request):
         try:
             profile = UserProfile.objects.get(user=request.user)
             if profile.status == 'active':
-                # Foydalanuvchi profili faol bo'lsa, 'index' sahifasiga yo'naltiramiz
-                return redirect('index')
+                # Foydalanuvchi profili faol bo'lsa, rolga qarab yo'naltiramiz
+                if profile.role == 'creator':
+                    return redirect('creator:dashboard')
+                elif profile.role == 'approver':
+                    return redirect('approver:dashboard')
+                else:
+                    return redirect('index')
             else:
-                # Agar profili faol bo'lmasa, tizimdan chiqaramiz
                 messages.error(request, "Sizning profilingiz nofaol. Administratorga murojaat qiling.")
                 logout(request)
-                return redirect('login') # Yoki boshqa sahifaga
+                return redirect('login')
         except UserProfile.DoesNotExist:
-            # Agar foydalanuvchi uchun UserProfile mavjud bo'lmasa
             messages.error(request, "Sizning profilingiz topilmadi. Administratorga murojaat qiling.")
             logout(request)
             return redirect('login')
@@ -107,23 +123,27 @@ def login_page(request):
             try:
                 profile = UserProfile.objects.get(user=user)
                 if profile.status != 'active':
-                    # Profil nofaol bo'lsa
                     error = "Foydalanuvchi profilingiz faol emas. Administratorga murojaat qiling."
                 else:
-                    # Tizimga kirish
                     login(request, user)
                     if remember:
                         request.session.set_expiry(86400)  # 1 kun
                     else:
                         request.session.set_expiry(0)
-                    return redirect('index')
+                    # Rolga qarab yo'naltirish
+                    if profile.role == 'creator':
+                        return redirect('creator:dashboard')
+                    elif profile.role == 'approver':
+                        return redirect('approver:dashboard')
+                    else:
+                        return redirect('index')
             except UserProfile.DoesNotExist:
-                # Agar kirishga urinayotgan foydalanuvchi uchun UserProfile modeli bo'lmasa
                 error = "Sizning profilingiz topilmadi. Administratorga murojaat qiling."
         else:
             error = "Login yoki parol noto‘g‘ri."
 
     return render(request, 'labcerti/auth/login.html', {'error': error})
+
 
 
 @login_required
@@ -140,7 +160,7 @@ def user_profile(request):
             user_form.save()
             profile_form.save()
             messages.success(request, 'Sizning maʼlumotlaringiz muvaffaqiyatli yangilandi.')
-            return redirect('your_app_name:profile')
+            return redirect('labcerti:profile')
         else:
             messages.error(request,
                            'Maʼlumotlarni saqlashda xato yuz berdi. Iltimos, maʼlumotlarni toʻgʻri kiritganingizni tekshiring.')
@@ -152,7 +172,7 @@ def user_profile(request):
             password_form.save()
             update_session_auth_hash(request, password_form.user)
             messages.success(request, 'Sizning parolingiz muvaffaqiyatli o‘zgartirildi.')
-            return redirect('your_app_name:profile')
+            return redirect('labcerti:profile')
         else:
             messages.error(request,
                            'Parolni oʻzgartirishda xato yuz berdi. Iltimos, eski parolni va yangi parolni toʻgʻri kiritganingizni tekshiring.')
@@ -169,7 +189,7 @@ def user_profile(request):
         'password_form': password_form,
         'user_profile_instance': user_profile_instance,  # Model instance'ini ham context'ga qo'shamiz
     }
-    return render(request, 'profile.html', context)
+    return render(request, 'labcerti/profile.html', context)
 
 
 def public_certificate_search(request):
@@ -193,9 +213,8 @@ def certificate_detail(request, pk):
     cert = get_object_or_404(Certificate, pk=pk)
     return render(request, 'search/certificate_detail.html', {"certificate": cert})
 
-def custcustom_404_viewom_404(request, exception):
+def custom_404_view(request, exception):
     return render(request, 'labcerti/404.html', status=404)
-
 
 def user_logout(request):
     logout(request)

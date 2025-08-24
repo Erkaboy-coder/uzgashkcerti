@@ -17,61 +17,66 @@ from django.core.paginator import Paginator
 
 
 @login_required
-def approver_list(request, status_filter=None, **kwargs):
+def dashboard(request, status=None):
     user_profile = get_object_or_404(UserProfile, user=request.user)
+    if user_profile.role != 'approver':
+        return redirect('login')
 
-    search_query = request.GET.get('search', '')
+    # Asosiy queryset — qoralamalarni chiqarib tashlaymiz
+    queryset = Certificate.objects.exclude(status='draft').order_by('-created_at')
 
-    # Avval GET parametrlardan olamiz, agar bo'lmasa URL kwargs-dan olamiz
-    status_filter = request.GET.get('status') or status_filter
+    # Status bo‘yicha filter (URL orqali)
+    if status in ['pending', 'approved', 'rejected']:
+        queryset = queryset.filter(status=status)
 
-    # Base queryset
-    all_certificates = Certificate.objects.all()
+    # GET orqali qidiruv
+    certificate_number = request.GET.get('certificate_number')
+    owner_inn = request.GET.get('owner_inn')
+    device_name = request.GET.get('device_name')
+    device_serial = request.GET.get('device_serial')
+    status_get = request.GET.get('status')
+    from_date = request.GET.get('from_date')
+    to_date = request.GET.get('to_date')
 
-    # Sidebar hisoblash
-    new_certificates_count = all_certificates.filter(status='pending').count()
-    approved_certificates_count = all_certificates.filter(status='approved', approved_by=user_profile).count()
-    rejected_certificates_count = all_certificates.filter(status='rejected', approved_by=user_profile).count()
-    total_certificates_count = new_certificates_count + approved_certificates_count + rejected_certificates_count
+    if certificate_number:
+        queryset = queryset.filter(certificate_number__icontains=certificate_number)
+    if owner_inn:
+        queryset = queryset.filter(owner_inn__icontains=owner_inn)
+    if device_name:
+        queryset = queryset.filter(device_name__icontains=device_name)
+    if device_serial:
+        queryset = queryset.filter(device_serial_numbers__icontains=device_serial)
+    if status_get in ['pending', 'approved', 'rejected']:
+        queryset = queryset.filter(status=status_get)
+    if from_date:
+        queryset = queryset.filter(created_at__date__gte=from_date)
+    if to_date:
+        queryset = queryset.filter(created_at__date__lte=to_date)
 
-    # Filter qilish
-    certificates = all_certificates
-    if status_filter == 'new':
-        certificates = certificates.filter(status='pending')
-    elif status_filter == 'approved':
-        certificates = certificates.filter(status='approved', approved_by=user_profile)
-    elif status_filter == 'rejected':
-        certificates = certificates.filter(status='rejected', approved_by=user_profile)
-
-    if search_query:
-        certificates = certificates.filter(certificate_number__icontains=search_query)
-
-    date_from = request.GET.get('date_from')
-    date_to = request.GET.get('date_to')
-    if date_from:
-        certificates = certificates.filter(created_at__date__gte=date_from)
-    if date_to:
-        certificates = certificates.filter(created_at__date__lte=date_to)
-
-    certificates = certificates.order_by('-created_at')
+    # Statistikalar (draftsizlik bilan)
+    pending_count = Certificate.objects.filter(status='pending').count()
+    approved_count = Certificate.objects.filter(status='approved').count()
+    rejected_count = Certificate.objects.filter(status='rejected').count()
+    total_count = pending_count + approved_count + rejected_count  # draftsiz jami
 
     # Paginator
-    paginator = Paginator(certificates, 10)
+    paginator = Paginator(queryset, 10)
     page_number = request.GET.get('page')
-    certificates_page = paginator.get_page(page_number)
+    page_obj = paginator.get_page(page_number)
 
     context = {
-        'certificates': certificates_page,
-        'status_filter': status_filter,
-        'search_query': search_query,
-        'date_from': date_from,
-        'date_to': date_to,
-        'total_certificates_count': total_certificates_count,
-        'sent_certificates_count': new_certificates_count,
-        'approved_certificates_count': approved_certificates_count,
-        'rejected_certificates_count': rejected_certificates_count,
+        'certificates': page_obj,
+        'page_obj': page_obj,
+        'paginator': paginator,
+        'current_status': status if status else (status_get if status_get else ''),
+        'pending_count': pending_count,
+        'approved_count': approved_count,
+        'rejected_count': rejected_count,
+        'total_certificates_count': total_count,
+        'request': request,  # search form uchun
     }
-    return render(request, 'approver/dashboard.html', context)
+    return render(request, 'labcerti/approver/dashboard.html', context)
+
 
 
 

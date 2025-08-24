@@ -81,48 +81,8 @@
 
 
 
-<!-- Search Form -->
-<div class="card mb-4">
-    <div class="card-header"><i class="fas fa-search me-1"></i>Qidiruv</div>
-    <div class="card-body">
-        <form id="searchForm" class="row g-3">
-            <div class="col-md-3">
-                <input type="text" class="form-control" placeholder="Guvohnoma raqami" name="certificate_number">
-            </div>
-            <div class="col-md-3">
-                <input type="text" class="form-control" placeholder="Egasi INN" name="owner_inn">
-            </div>
-            <div class="col-md-3">
-                <input type="text" class="form-control" placeholder="Seria raqami" name="serial_number">
-            </div>
-            <div class="col-md-3">
-                <input type="text" class="form-control" placeholder="Qurilma seria nomeri" name="device_serial">
-            </div>
-            <div class="col-md-3">
-                <select class="form-control" name="status">
-                    <option value="">-- Barchasi --</option>
-                    <option value="pending">Qoralamalar</option>
-                    <option value="pending">Tekshiruvdagilar</option>
-                    <option value="approved">Tasdiqlangan</option>
-                    <option value="rejected">Rad etilgan</option>
+ {% include "labcerti/components/filter.html" %}
 
-                </select>
-            </div>
-            <div class="col-md-3">
-                <input type="date" class="form-control" name="from_date">
-            </div>
-            <div class="col-md-3">
-                <input type="date" class="form-control" name="to_date">
-            </div>
-            <div class="col-md-3 d-flex">
-                <button type="submit" class="btn btn-primary me-2">Qidirish</button>
-                <button type="reset" id="resetBtn" class="btn btn-secondary">Tozalash</button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Sertifikatlar jadvali -->
 <div class="card mb-4">
     <div class="card-header"><i class="fas fa-certificate me-1"></i> Sertifikatlar</div>
     <div class="card-body">
@@ -143,10 +103,10 @@
             <tbody>
                 {% for cert in certificates %}
                 <tr data-status="{{ cert.status }}">
-                    <th>{{ forloop.counter }}</th>
+                    <th>{{ page_obj.start_index|add:forloop.counter0 }}</th>
                     <td>{{ cert.certificate_number }}</td>
                     <td>{{ cert.created_by.user.username }}</td>
-                    <td>{{ cert.owner.name }}</td>
+                    <td>{{ cert.owner_name }}</td>
                     <td>
                         {% if cert.status == 'pending' %}
                             <span class="badge bg-warning text-dark">Yangi</span>
@@ -166,8 +126,33 @@
                 {% endfor %}
             </tbody>
         </table>
-    </div>
+
+        <nav aria-label="Sertifikatlar sahifalari" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Oldingi</a>
+                    </li>
+                {% endif %}
+
+                {% for i in paginator.page_range %}
+                    {% if page_obj.number == i %}
+                        <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Keyingi</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        </div>
 </div>
+
 
 {% endblock %}
 

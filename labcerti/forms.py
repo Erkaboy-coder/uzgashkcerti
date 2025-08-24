@@ -3,39 +3,59 @@ from .models import Certificate, Organization ,UserProfile
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import PasswordChangeForm
 
+from django import forms
+from .models import Certificate
+
 class CertificateForm(forms.ModelForm):
     class Meta:
         model = Certificate
         fields = [
-            'document_type',
-            'comparison_date',
-            # 'valid_until_date' maydoni bu yerdan olib tashlandi.
-            'service_provider_name',
-            'owner',
-            'device_name',
-            'device_serial_numbers',
+            'standards_used',
+            'comparison_document',
+            'owner_inn',
+            'owner_name',
             'manufacturer',
             'origin_country',
             'measurement_range',
             'error_limit',
+            'device_name',
+            'device_serial_numbers',
             'comparison_methodology_doc',
-            'standards_used',
-            'metrologist_name',
             'protocol_file',
         ]
         widgets = {
-            'comparison_date': forms.DateInput(attrs={'type': 'date'}),
+            'protocol_file': forms.ClearableFileInput(attrs={'accept': 'application/pdf'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        for field_name, field in self.fields.items():
-            field.widget.attrs.update({'class': 'form-control'})
+        placeholders = {
+            'standards_used': 'Etalonlar (namunaviy o‘lchash vositalari) nomi va belgilanishi',
+            'comparison_document': 'Qiyoslash bo‘yicha hujjat nomi va belgilanishi',
+            'owner_inn': '123456789',
+            'owner_name': 'Tashkilot nomi',
+            'manufacturer': 'Tayyorlovchi nomi',
+            'origin_country': 'Davlat',
+            'measurement_range': '0-100',
+            'error_limit': '±0.01',
+            'device_name': 'O‘lchash vositasining nomi',
+            'device_serial_numbers': 'Zavod raqami',
+            'comparison_methodology_doc': 'Normativ hujjat nomi',
+        }
 
-        self.fields['owner'].queryset = Organization.objects.all().order_by('name')
+        for field_name, field in self.fields.items():
+            if field_name != 'protocol_file':
+                field.widget.attrs.update({
+                    'class': 'form-control',
+                    'placeholder': placeholders.get(field_name, '')
+                })
+            else:
+                field.widget.attrs.update({
+                    'class': 'form-control',
+                })
+
         
-        self.fields['document_type'].widget.attrs['readonly'] = 'readonly'
 
 
 class UserForm(forms.ModelForm):

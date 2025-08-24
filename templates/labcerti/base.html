@@ -17,10 +17,75 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body class="sb-nav-fixed">
+
+    {% if messages %}
+        <div id="alert-container" style="position: fixed; top: 20px; right: 20px; z-index: 1050; display: flex; flex-direction: column; gap: 10px;">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert"
+                style="opacity: 0.95; min-width: 300px; position: relative; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <div class="progress-line" style="position: absolute; bottom: 0; left: 0; height: 4px; background-color: rgba(0,0,0,0.2); width: 100%;"></div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const alerts = document.querySelectorAll('#alert-container .alert');
+            alerts.forEach((alert) => {
+                const progress = alert.querySelector('.progress-line');
+                let width = 100;
+                const duration = 3000; // 3 sekund
+                const intervalTime = 20; // har 20ms update
+                const decrement = (intervalTime / duration) * 100;
+
+                const interval = setInterval(() => {
+                    width -= decrement;
+                    if (width <= 0) {
+                        clearInterval(interval);
+                        alert.style.transition = 'opacity 0.5s, transform 0.5s';
+                        alert.style.opacity = '0';
+                        alert.style.transform = 'translateX(20px)';
+                        setTimeout(() => alert.remove(), 500);
+                    } else {
+                        progress.style.width = width + '%';
+                    }
+                }, intervalTime);
+            });
+        });
+        </script>
+
+        <style>
+        .alert {
+            border-radius: 8px;
+            padding-right: 2.5rem; /* close button uchun joy */
+            font-size: 0.95rem;
+        }
+        .progress-line {
+            transition: width 0.02s linear;
+        }
+        </style>
+        {% endif %}
+
+
+
     <!-- Navbar -->
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
         <!-- Navbar Brand-->
-        <a class="navbar-brand ps-3" href="{% url 'index' %}">Start Bootstrap</a>
+        <a class="navbar-brand ps-3" 
+            href="{% if request.user.is_authenticated %}
+                        {% if request.user.userprofile.role == 'creator' %}
+                            {% url 'creator:dashboard' %}
+                        {% elif request.user.userprofile.role == 'approver' %}
+                            {% url 'approver:dashboard' %}
+                        {% endif %}
+                    {% else %}
+                        {% url 'login' %}
+                    {% endif %}">
+                UZGASHKLITI
+            </a>
+
         <!-- Sidebar Toggle-->
         <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle"><i class="fas fa-bars"></i></button>
         
@@ -39,10 +104,10 @@
                     <i class="fas fa-user fa-fw"></i>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                    <li><a class="dropdown-item" href="#!">Settings</a></li>
-                    <li><a class="dropdown-item" href="#!">Activity Log</a></li>
+                    <li><a class="dropdown-item" href="{% url 'profile' %}">Profile</a></li>
+                    <!-- <li><a class="dropdown-item" href="#!">Activity Log</a></li> -->
                     <li><hr class="dropdown-divider" /></li>
-                    <li><a class="dropdown-item" href="#!">Logout</a></li>
+                    <li><a class="dropdown-item" href="{% url 'logout' %}">Chiqish</a></li>
                 </ul>
             </li>
         </ul>
@@ -54,33 +119,24 @@
             <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
                 <div class="sb-sidenav-menu">
                     <div class="nav">
-                        <div class="sb-sidenav-menu-heading">Core</div>
-                        <a class="nav-link" href="{% url 'index' %}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                            Dashboard
-                        </a>
-                        <div class="sb-sidenav-menu-heading">Interface</div>
-                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts">
-                            <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
-                            Layouts
-                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                        </a>
-                        <div class="collapse" id="collapseLayouts" data-bs-parent="#sidenavAccordion">
-                            <nav class="sb-sidenav-menu-nested nav">
-                                <a class="nav-link" href="#">Static Navigation</a>
-                                <a class="nav-link" href="#">Light Sidenav</a>
-                            </nav>
-                        </div>
                         
-                        <div class="sb-sidenav-menu-heading">Addons</div>
-                        <a class="nav-link" href="#">
-                            <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
-                            Charts
-                        </a>
-                        <a class="nav-link" href="#">
-                            <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
-                            Tables
-                        </a>
+            
+                        {% if request.user.is_authenticated and request.user.userprofile.is_center_user %}
+                            <div class="sb-sidenav-menu-heading">Senter</div>
+                            <a class="nav-link" href="{% url 'index' %}">
+                                <div class="sb-nav-link-icon"><i class="fas fa-solid fa-list"></i></div>
+                                Sertifikatlar
+                            </a>
+                            {% else %}
+
+                            <div class="sb-sidenav-menu-heading">Labaratoriya</div>
+                                <a class="nav-link" href="{% url 'creator:dashboard' %}">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-solid fa-list"></i></div>
+                                    Sertifikatlar {{request.user.is_center_user}}
+                                </a>
+                        {% endif %}
+
+
                     </div>
                 </div>
                 <div class="sb-sidenav-footer">
@@ -105,17 +161,41 @@
             
             <!-- Footer -->
             <footer class="py-4 bg-light mt-auto">
-                <div class="container-fluid px-4">
-                    <div class="d-flex align-items-center justify-content-between small">
-                        <div class="text-muted">Copyright &copy; Your Website 2023</div>
-                        <div>
-                            <a href="#">Privacy Policy</a>
-                            &middot;
-                            <a href="#">Terms &amp; Conditions</a>
-                        </div>
-                    </div>
+    <div class="container-fluid px-4">
+        <div class="d-flex flex-column flex-md-row align-items-center justify-content-between small">
+            <div class="text-muted mb-2 mb-md-0">
+                &copy; <span id="currentYear"></span> UZGASHKLITI. All rights reserved.
+            </div>
+            <div class="d-flex align-items-center">
+                <!-- <div class="me-3">
+                    <a href="#" class="text-decoration-none">Privacy Policy</a>
                 </div>
-            </footer>
+                <div class="me-3">
+                    <a href="#" class="text-decoration-none">Terms &amp; Conditions</a>
+                </div> -->
+                <div id="onlineTime" class="text-dark"></div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Yilni avtomatik chiqarish
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+    // Onlayn soat
+    function updateTime() {
+        const now = new Date();
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const seconds = now.getSeconds().toString().padStart(2, '0');
+        document.getElementById('onlineTime').textContent = hours + ':' + minutes + ':' + seconds;
+    }
+    setInterval(updateTime, 1000);
+    updateTime(); // sahifa yuklanganda ham ishlashi uchun
+</script>
+
+
         </div>
     </div>
     

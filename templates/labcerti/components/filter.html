@@ -1,0 +1,40 @@
+<!-- Search Form -->
+<div class="card mb-4">
+    <div class="card-header"><i class="fas fa-search me-1"></i>Qidiruv</div>
+    <div class="card-body">
+        <form id="searchForm" class="row g-3" method="get" action="{% url 'creator:dashboard' %}">
+    <div class="col-md-3">
+        <input type="text" class="form-control" placeholder="Guvohnoma raqami" name="certificate_number" value="{{ request.GET.certificate_number }}">
+    </div>
+    <div class="col-md-3">
+        <input type="text" class="form-control" placeholder="Egasi INN" name="owner_inn" value="{{ request.GET.owner_inn }}">
+    </div>
+    <div class="col-md-3">
+        <input type="text" class="form-control" placeholder="O‘lchash vositasi" name="device_name" value="{{ request.GET.device_name }}">
+    </div>
+    <div class="col-md-3">
+        <input type="text" class="form-control" placeholder="Zavod raqami" name="device_serial" value="{{ request.GET.device_serial }}">
+    </div>
+    <div class="col-md-3">
+        <select class="form-control" name="status">
+            <option value="">-- Barchasi --</option>
+            <option value="draft" {% if current_status == 'draft' %}selected{% endif %}>Qoralamalar</option>
+            <option value="pending" {% if current_status == 'pending' %}selected{% endif %}>Tekshiruvdagilar</option>
+            <option value="approved" {% if current_status == 'approved' %}selected{% endif %}>Tasdiqlangan</option>
+            <option value="rejected" {% if current_status == 'rejected' %}selected{% endif %}>Rad etilgan</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <input type="date" class="form-control" name="from_date" value="{{ request.GET.from_date }}">
+    </div>
+    <div class="col-md-3">
+        <input type="date" class="form-control" name="to_date" value="{{ request.GET.to_date }}">
+    </div>
+    <div class="col-md-3 d-flex">
+        <button type="submit" class="btn btn-primary me-2">Qidirish</button>
+        <a href="{% url 'creator:dashboard' %}" class="btn btn-secondary">Tozalash</a>
+    </div>
+</form>
+
+    </div>
+</div>
