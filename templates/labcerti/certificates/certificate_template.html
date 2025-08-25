@@ -269,8 +269,8 @@
                     {% else %}
                         <div class="qr-code" style="border:1px dashed gray; display:flex; align-items:center; justify-content:center; font-size:10px;">QR CODE JOY</div>
                     {% endif %}
-                    <p>Qiyoslash sanasi: <strong>{{ cert.comparison_date|date:"Y-m-d" }}</strong></p>
-                    <p>Amal qilish muddati: <strong>{{ cert.valid_until_date|date:"Y-m-d" }}</strong></p>
+                    <p>Qiyoslash sanasi: <strong>{{ cert.comparison_date|date:"Y" }}-yil {{ cert.comparison_date|date:"d" }}-{{ cert.comparison_date|date:"F" }}</strong></p>
+                    <p>Amal qilish muddati: <strong>{{ cert.valid_until_date|date:"Y" }}-yil {{ cert.valid_until_date|date:"d" }}-{{ cert.valid_until_date|date:"F" }} gacha</strong></p>
                 </div>
 
                 <div class="sign-box">
