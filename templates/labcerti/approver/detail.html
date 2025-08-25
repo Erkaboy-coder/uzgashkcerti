@@ -1,107 +1,175 @@
 {% extends "labcerti/base.html" %}
 {% load static %}
 
-{% block title %}Sertifikat {{ cert.certificate_number }}{% endblock %}
-{% block page_title %}Sertifikat tafsilotlari{% endblock %}
-{% block breadcrumb %}Sertifikat tafsilotlari{% endblock %}
+{% block title %}Guvohnoma {{ cert.certificate_number }}{% endblock %}
+{% block page_title %}Guvohnoma tafsilotlari{% endblock %}
+{% block breadcrumb %}Guvohnoma tafsilotlari{% endblock %}
 
 {% block content %}
 <div class="card shadow-lg border-0 rounded-4 mt-4">
-    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-        <h5 class="mb-0"><i class="fas fa-check-circle me-2"></i>Sertifikat {{ cert.certificate_number }}</h5>
-        <a href="{% url 'approver:dashboard' %}" class="btn btn-light btn-sm shadow-sm rounded-3">
+
+    <!-- Card Header -->
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-certificate me-2"></i>Guvohnoma {{ cert.certificate_number }}</h5>
+        <a href="{% url 'creator:dashboard' %}" class="btn btn-light btn-sm shadow-sm rounded-3">
             <i class="fas fa-arrow-left me-1"></i> Orqaga
         </a>
     </div>
+
+    <!-- Card Body -->
     <div class="card-body p-4">
 
-        <!-- Certificate preview -->
+        <!-- Certificate Preview (A4) -->
         <div class="certificate-preview position-relative"
-             style="background: url('{% static "images/certificate_bg.png" %}') no-repeat center/cover;
-                    width: 100%; max-width: 900px; height: 750px; margin: 0 auto;
-                    border: 1px solid #ccc; padding: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+             style="width: 210mm; height: 297mm; margin: 0 auto; padding: 30px; box-sizing: border-box;
+                    border: 10px double cornflowerblue; overflow: hidden; font-family: Arial, sans-serif;">
 
-            <!-- Header text -->
-            <div style="text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 20px;">
-                O‘ZBEKISTON RESPUBLIKASIDA O‘LCHASHLARNING YAGONA BIRLIKDA BO'LISHINI TA’MINLASH TIZIMI
+            <!-- Logos va Header -->
+            <div class="row mb-2 align-items-center" style="border-bottom: 4px double darkblue; padding-bottom: 5px;">
+
+                <div class="col-3 d-flex justify-content-center align-items-center">
+                    <img src="{% static 'assets/logo/image.png' %}" alt="Logo" style="height: 90px; width: 90px; object-fit: contain;">
+                </div>
+                <div class="col-9 d-flex flex-column justify-content-center text-center">
+                    <h5 style="font-weight: bold; margin: 0; font-size: 16px;">“O‘zGASHKLITI” MCHJ Qurilishda muhandislik qidiruvlari,</h5>
+                    <h5 style="font-weight: bold; margin: 0; font-size: 16px;">geoaxborot va shaharsozlik kadastri loyiha ilmiy-tadqiqot instituti</h5>
+                </div>
+
+                <div class="col-3 d-flex justify-content-center align-items-center">
+                    <img src="{% static 'assets/logo/logo2.png' %}" alt="Logo" style="height: 90px; width: 90px; object-fit: contain;">
+                </div>
+                <div class="col-9 d-flex flex-column justify-content-center text-center">
+                    <h5 style="font-weight: bold; margin: 0; font-size: 16px;">O‘ZBEKISTON RESPUBLIKASIDA O‘LCHASHLARNING YAGONA</h5>
+                    <h5 style="font-weight: bold; margin: 0; font-size: 16px;">BIRLIKDA BO'LISHINI TA’MINLASH TIZIMI</h5>
+                </div>
             </div>
 
-            <!-- Logos -->
-            <div style="position: absolute; top: 20px; left: 40px;">
-                <img src="{% static 'assets/logo/logo2.png' %}" alt="Logo" style="height: 80px;">
-            </div>
-            <div style="position: absolute; top: 20px; right: 40px;">
-                <img src="{% static 'assets/logo/image.png' %}" alt="Logo" style="height: 80px;">
+            <!-- Certificate Title & Number -->
+            <div style="text-align: center; margin: 20px 0; position: relative; border-bottom: 4px double darkblue;">
+                <h2 style="font-weight: bold; font-size: 16px; margin-bottom: 5px; letter-spacing: 1px;">
+                    O‘lchash vositasini qiyoslash
+                </h2>
+                <h1 style="font-weight: bolder; font-size: 22px; color: darkblue; margin-bottom: 2px; letter-spacing: 2px;">
+                    GUVOHNOMASI
+                </h1>
+                <p style="font-weight: bold; font-size: 26px; color: darkred; margin: 0;">
+                    № {{ cert.certificate_number }}
+                </p>
             </div>
 
-            <!-- Sertifikat raqami -->
-            <div style="text-align: center; margin-top: 80px; font-size: 24px; font-weight: bold;">
-                Guvohnoma № {{ cert.certificate_number }}
+            <!-- Certificate Details Grid -->
+            <div style="display: grid; grid-template-columns: 1fr 10px 3fr; gap: 10px; font-size: 13px; margin-top: 20px; padding: 15px;
+                        word-break: break-word; overflow-wrap: break-word;">
+                {% if cert.standards_used %}
+                    <div style="text-align: right; font-weight: bold;">Etalonlar (namunaviy o‘lchash vositalari) nomi va belgilanishi</div>
+                    <div style="text-align: center;">:</div>
+                    <div>{{ cert.standards_used }}</div>
+                {% endif %}
+                {% if cert.comparison_document %}
+                    <div style="text-align: right; font-weight: bold;">Qiyoslash bo‘yicha hujjat nomi va belgilanishi</div>
+                    <div style="text-align: center;">:</div>
+                    <div>{{ cert.comparison_document }}</div>
+                {% endif %}
+                {% if cert.owner_name %}
+                    <div style="text-align: right; font-weight: bold;">O‘lchash vositalarining egasi - yuridik shaxs </div>
+                    <div style="text-align: center;">:</div>
+                    <div>INN: {{ cert.owner_inn }}<br> nomi: {{ cert.owner_name }}</div>
+                {% endif %}
+                {% if cert.manufacturer %}
+                    <div style="text-align: right; font-weight: bold;">O‘lchash vositalarini tayyorlovchi</div>
+                    <div style="text-align: center;">:</div>
+                    <div>{{ cert.manufacturer }}</div>
+                {% endif %}
+                {% if cert.origin_country %}
+                    <div style="text-align: right; font-weight: bold;">Tayyorlovchi – import qiluvchi mamlakat</div>
+                    <div style="text-align: center;">:</div>
+                    <div>{{ cert.origin_country }}</div>
+                {% endif %}
+                {% if cert.measurement_range %}
+                    <div style="text-align: right; font-weight: bold;">O‘lchash vositalari parametrlari</div>
+                    <div style="text-align: center;">:</div>
+                    <div>{{ cert.measurement_range }}</div>
+                {% endif %}
+                {% if cert.error_limit %}
+                    <div style="text-align: right; font-weight: bold;">Xatolik chegaralari / aniqlik klassi</div>
+                    <div style="text-align: center;">:</div>
+                    <div>{{ cert.error_limit }}</div>
+                {% endif %}
+                {% if cert.device_name %}
+                    <div style="text-align: right; font-weight: bold;">O‘lchash vositasi</div>
+                    <div style="text-align: center;">:</div>
+                    <div>{{ cert.device_name }}</div>
+                {% endif %}
+                {% if cert.device_serial_numbers %}
+                    <div style="text-align: right; font-weight: bold;">Zavod raqami</div>
+                    <div style="text-align: center;">:</div>
+                    <div>{{ cert.device_serial_numbers }}</div>
+                {% endif %}
+                {% if cert.comparison_methodology_doc %}
+                    <div style="text-align: right; font-weight: bold;">Normativ hujjat</div>
+                    <div style="text-align: center;">:</div>
+                    <div>{{ cert.comparison_methodology_doc }}</div>
+                {% endif %}
+                {% if cert.protocol_file %}
+                    <div style="text-align: right; font-weight: bold;">Protokol fayli</div>
+                    <div style="text-align: center;">:</div>
+                    <div><a href="{{ cert.protocol_file.url }}" target="_blank">PDF faylni ko‘rish</a></div>
+                {% endif %}
             </div>
 
-            <!-- Owner va device -->
-            <div style="display: table; width: 100%; margin-top: 40px; font-size: 18px; text-align: left;">
-                <div style="display: table-row;">
-                    <div style="display: table-cell; text-align: right; width: 40%;">Kimga tegishli</div>
-                    <div style="display: table-cell; text-align: center; width: 5%;">:</div>
-                    <div style="display: table-cell; text-align: left; width: 55%; font-weight: bold;">
-                        {{ cert.owner_name }} ({{ cert.owner_inn }})
+            <!-- Certification Info -->
+            <div style="margin-top: 25px; border-top: 4px double darkblue; padding-top: 8px; font-size: 12px; text-align: justify;">
+                Mazkur guvohnoma o‘lchash vositalari bo‘yicha etalonlarga muvofiqlikni tasdiqlaydi va o‘lchash birliklarini belgilangan standartlarga mos holda taqdim etadi.
+            </div>
+
+            <!-- Signatures -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 15px;">
+                <div style="display: flex; align-items: flex-end; gap: 15px;">
+                    <div style="text-align: center;">
+                        {% if cert.qr_code_image %}
+                            <img src="{{ cert.qr_code_image.url }}" alt="QR code" style="height: 90px; width: 90px;">
+                        {% else %}
+                            <div style="height: 90px; width: 90px; border: 1px dashed gray; display: flex; align-items: center; justify-content: center; font-size: 10px; color: gray;">
+                                QR CODE JOY
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div style="font-size: 13px;">
+                        <p style="margin-bottom: 0;">Yaratilgan sana</p>
+                        <p style="font-weight: bold;">{{ cert.created_at|date:"d.m.Y" }}</p>
                     </div>
                 </div>
-                <div style="display: table-row;">
-                    <div style="display: table-cell; text-align: right;">O'lchash vositasi</div>
-                    <div style="display: table-cell; text-align: center;">:</div>
-                    <div style="display: table-cell; font-weight: bold;">{{ cert.device_name }}</div>
+
+                <div style="font-size: 13px; text-align: center;">
+                    <p style="margin-bottom: 0;">Qiyoslovchi</p>
+                    <p style="font-weight: bold; margin-bottom: 0;">{{ cert.metrologist_name }}</p>
+                    <p style="border-top: 1px solid black; width: 100px; margin: 5px auto 0;"></p>
                 </div>
-                <div style="display: table-row;">
-                    <div style="display: table-cell; text-align: right;">Zavod raqami</div>
-                    <div style="display: table-cell; text-align: center;">:</div>
-                    <div style="display: table-cell; font-weight: bold;">{{ cert.device_serial_numbers }}</div>
+
+                <div style="font-size: 13px; text-align: center;">
+                    <p style="margin-bottom: 0;">Tasdiqlovchi</p>
+                    <p style="font-weight: bold; margin-bottom: 0;">
+                        {% if cert.approved_by %}
+                            {{ cert.approved_by.user.get_full_name }}
+                        {% else %}
+                            _________________
+                        {% endif %}
+                    </p>
+                    <p style="border-top: 1px solid black; width: 100px; margin: 5px auto 0;"></p>
                 </div>
             </div>
 
-            <!-- Qo'shimcha maydonlar -->
-            <div style="text-align: center; margin-top: 30px; font-size: 16px;">
-                <p>Qiyoslash sanasi: <strong>{{ cert.comparison_date|date:"d.m.Y" }}</strong></p>
-                <p>Qiyoslash uslubiyati: <strong>{{ cert.comparison_methodology_doc }}</strong></p>
-                <p>Etalonlar va vositalar: <strong>{{ cert.standards_used }}</strong></p>
-                <p>Metrologiya xizmati: <strong>{{ cert.service_provider_name }}</strong></p>
-                <p>Qiyoslovchi: <strong>{{ cert.metrologist_name }}</strong></p>
-                <p>O'lchash vositalarini tayyorlovchi: <strong>{{ cert.manufacturer }}</strong></p>
-                <p>Mamlakat: <strong>{{ cert.origin_country }}</strong></p>
-                <p>Parametrlar va o'lchashlar: <strong>{{ cert.measurement_range }}</strong></p>
-                <p>Xatolik chegaralari: <strong>{{ cert.error_limit }}</strong></p>
+            <!-- Bottom Warning -->
+            <div style="margin-top: 15px; font-size: 13px; text-align: center;">
+                <i style="color: red; font-weight: bold;">
+                    Mazkur guvohnomani qalbakilashtirish - qonunga muvofiq javobgarlikka tortiladi.
+                </i>
             </div>
 
-            <!-- Belgi -->
-            <div style="text-align: center; margin-top: 30px; font-size: 14px; font-weight: bold;">
-                Mazkur guvohnomani qalbakilashtirish - qonunga muvofiq javobgarlikka tortiladi.
-            </div>
-
-            <!-- QR code -->
-            <div style="position: absolute; bottom: 40px; right: 40px;">
-                {% if cert.qr_code_image %}
-                    <img src="{{ cert.qr_code_image.url }}" alt="QR code" style="height: 100px; width: 100px;">
-                {% endif %}
-            </div>
-
-            <!-- Tasdiqlovchi va sana -->
-            <div style="position: absolute; bottom: 40px; left: 40px; font-size: 14px;">
-                {% if cert.status == 'approved' and cert.approved_by %}
-                    Tasdiqladi: {{ cert.approved_by.user.get_full_name }} <br>
-                    Sana: {{ cert.approved_at|date:"d.m.Y" }}
-                {% elif cert.status == 'rejected' and cert.rejected_by %}
-                    Rad etdi: {{ cert.rejected_by.user.get_full_name }} <br>
-                    Sana: {{ cert.rejected_at|date:"d.m.Y" }}
-                {% else %}
-                    Yaratdi: {{ cert.created_by.user.get_full_name }} <br>
-                    Sana: {{ cert.created_at|date:"d.m.Y" }}
-                {% endif %}
-            </div>
         </div>
 
-        <!-- Approver action buttons -->
-        <div class="mt-4 text-center">
+         <!-- Buttons -->
+         <div class="mt-4 text-center">
             {% if cert.status == 'pending' %}
                 <form method="post" action="{% url 'approver:approve_certificate' cert.id %}" style="display:inline;">
                     {% csrf_token %}

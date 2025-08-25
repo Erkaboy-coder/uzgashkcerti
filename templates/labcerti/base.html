@@ -119,8 +119,7 @@
             <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
                 <div class="sb-sidenav-menu">
                     <div class="nav">
-                        
-            
+
                         {% if request.user.is_authenticated and request.user.userprofile.is_center_user %}
                             <div class="sb-sidenav-menu-heading">Senter</div>
                             <a class="nav-link" href="{% url 'index' %}">
@@ -132,10 +131,14 @@
                             <div class="sb-sidenav-menu-heading">Labaratoriya</div>
                                 <a class="nav-link" href="{% url 'creator:dashboard' %}">
                                     <div class="sb-nav-link-icon"><i class="fas fa-solid fa-list"></i></div>
-                                    Sertifikatlar {{request.user.is_center_user}}
+                                    Sertifikatlar
                                 </a>
                         {% endif %}
 
+{#                    <a class="nav-link" href="{% url 'profile' %}">#}
+{#                        <div class="sb-nav-link-icon"><i class="fas fa-user me-1"></i></div>#}
+{#                        Kabinet#}
+{#                    </a>#}
 
                     </div>
                 </div>
