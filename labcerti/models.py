@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
-from datetime import timedelta
 from django.db.models import F
 from io import BytesIO
 import qrcode
@@ -15,6 +14,8 @@ from io import BytesIO
 from django.conf import settings
 import os
 from django.core.validators import FileExtensionValidator
+from datetime import timedelta
+from django.utils import timezone
 
 def validate_file_size(value):
     # Fayl hajmi 5MB dan oshmasligini tekshiradi
@@ -120,7 +121,6 @@ class Certificate(models.Model):
     approved_at = models.DateTimeField(blank=True, null=True, verbose_name="Tasdiqlangan sana")
     rejected_at = models.DateTimeField(blank=True, null=True, verbose_name="Rad etilgan sana")
 
-
     def save(self, *args, **kwargs):
         # Sertifikat raqamini avtomatik generatsiya qilish
         if not self.certificate_number:
@@ -138,9 +138,9 @@ class Certificate(models.Model):
         # Amal qilish muddatini hisoblash
         if self.comparison_date and not self.valid_until_date:
             self.valid_until_date = self.comparison_date + timedelta(days=365)
-        
+
         super().save(*args, **kwargs)
-        
+
     def generate_qr_code(self):
         # Agar PDF fayl mavjud bo'lsa, QR o'sha faylga link beradi
         if self.certificate_file:
@@ -161,7 +161,7 @@ class Certificate(models.Model):
             os.remove(self.certificate_file.path)
 
         context = {
-            'certificate': self,
+            'cert': self,
             'logo_url': f"{settings.BASE_URL}{settings.STATIC_URL}assets/logo/image.png",
         }
         html_string = render_to_string('labcerti/certificates/certificate_template.html', context)

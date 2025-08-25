@@ -84,9 +84,12 @@
 
                 {% if cert.status == 'pending' %}
                     <!-- Faqat pending bo‘lsa Approve/Reject tugmalari -->
-                    <a href="{% url 'approver:approve_certificate' cert.id %}" class="btn btn-sm btn-outline-success" title="Tasdiqlash">
-                        <i class="fas fa-check"></i>
-                    </a>
+                   <form method="POST" action="{% url 'approver:approve_certificate' cert.id %}" onsubmit="return disableButton(this);" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-success" title="Tasdiqlash">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    </form>
 
                     <a href="{% url 'approver:reject_certificate' cert.id %}"
                        class="btn btn-sm btn-outline-danger rejectBtn"

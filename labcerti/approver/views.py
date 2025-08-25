@@ -4,7 +4,6 @@ from labcerti.models import Certificate, UserProfile
 from django.contrib import messages
 from django.db.models import Q
 from django.contrib import messages
-from django.utils import timezone
 from django.template.loader import render_to_string
 from weasyprint import HTML
 from django.conf import settings
@@ -14,7 +13,8 @@ import traceback
 from django.db import transaction
 import os
 from django.core.paginator import Paginator
-
+from datetime import timedelta
+from django.utils import timezone
 
 @login_required
 def dashboard(request, status=None):
@@ -78,10 +78,6 @@ def dashboard(request, status=None):
     return render(request, 'labcerti/approver/dashboard.html', context)
 
 
-
-
-
-
 @login_required
 def approve_certificate(request, pk):
     if request.method == "POST":
@@ -90,14 +86,18 @@ def approve_certificate(request, pk):
 
         try:
             with transaction.atomic():
-                # Statusni yangilash
                 if certificate.status == 'pending':
                     certificate.status = 'approved'
+
+                    # Tasdiqlashda comparison_date va valid_until_date set qilish
+                    if not certificate.comparison_date:
+                        certificate.comparison_date = timezone.now().date()
+                    certificate.valid_until_date = certificate.comparison_date + timedelta(days=365)
+
                 certificate.approved_by = user_profile
                 certificate.approved_at = timezone.now()
 
-                # Eski fayllarni o‘chirish
-                # Fayl streamini yopish va faylni o'chirishga urinish
+                # Fayllar o'chirish va yaratish
                 if certificate.certificate_file:
                     try:
                         certificate.certificate_file.close()
@@ -112,16 +112,14 @@ def approve_certificate(request, pk):
                     except Exception as e:
                         print("QR kod faylini o'chirishda xato:", e)
 
-                # Yangi QR va PDF yaratish
                 certificate.generate_qr_code()
                 certificate.generate_pdf_file()
 
-                # Modelni saqlash
                 certificate.save()
 
             messages.success(
                 request,
-                f"Sertifikat #{certificate.certificate_number} muvaffaqiyatli yangilandi."
+                f"Sertifikat #{certificate.certificate_number} muvaffaqiyatli tasdiqlandi."
             )
 
         except Exception as e:
@@ -132,9 +130,7 @@ def approve_certificate(request, pk):
                 f"Sertifikatni tasdiqlashda xatolik yuz berdi: {e}"
             )
 
-        return redirect('approver:all')
-
-
+    return redirect('approver:dashboard')
 
 
 
