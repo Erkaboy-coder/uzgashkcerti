@@ -46,7 +46,7 @@
             </td>
             <td>
                 {% if cert.status == 'pending' %}
-                    <span class="badge bg-warning text-dark">Yuborilgan</span>
+                    <span class="badge bg-warning text-dark">Tekshiruvdagilar</span>
                 {% elif cert.status == 'approved' %}
                     <span class="badge bg-success">Tasdiqlangan</span>
                 {% elif cert.status == 'rejected' %}
@@ -87,9 +87,18 @@
                     <a href="{% url 'approver:approve_certificate' cert.id %}" class="btn btn-sm btn-outline-success" title="Tasdiqlash">
                         <i class="fas fa-check"></i>
                     </a>
-                    <a href="{% url 'approver:reject_certificate' cert.id %}" class="btn btn-sm btn-outline-danger" title="Rad etish">
-                        <i class="fas fa-times"></i>
+
+                    <a href="{% url 'approver:reject_certificate' cert.id %}"
+                       class="btn btn-sm btn-outline-danger rejectBtn"
+                       data-cert-number="{{ cert.certificate_number }}"
+                       data-device-name="{{ cert.device_name }}"
+                       data-device-serial="{{ cert.device_serial_numbers }}"
+                       data-url="{% url 'approver:reject_certificate' cert.id %}"
+                       title="Rad etish">
+                       <i class="fas fa-times"></i>
                     </a>
+
+
                 {% endif %}
             </td>
         </tr>

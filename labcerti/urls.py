@@ -2,7 +2,7 @@
 from django.urls import path, include
 from . import views
 from django.conf.urls import handler404
-
+from django.shortcuts import redirect
 from labcerti import views as lab_views
 
 handler404 = lab_views.custom_404_view
@@ -19,5 +19,6 @@ urlpatterns = [
     path('approver/', include('labcerti.approver.urls')),
 
     path('search/', views.public_certificate_search, name='public_search'),
+    path('', lambda request: redirect('login')),
 ]
 

@@ -1,19 +1,43 @@
+<!-- Delete Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title text-danger" id="deleteModalLabel">O'chirishni tasdiqlang</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Yopish"></button>
+    <div class="modal-content shadow-lg border-0 rounded-3">
+      <div class="modal-header bg-danger text-white rounded-top-3">
+        <h5 class="modal-title d-flex align-items-center" id="deleteModalLabel">
+          <i class="fas fa-trash-alt me-2"></i> O‘chirishni tasdiqlang
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Yopish"></button>
       </div>
       <div class="modal-body">
-        Siz rostdan ham quyidagi guvohnomani o‘chirmoqchimisiz?<br><br>
-        <strong>Guvohnoma raqami:</strong> <span id="modalCertNumber"></span><br>
-        <strong>O'lchash vositasi:</strong> <span id="modalDeviceName"></span><br>
-        <strong>Zavod raqami:</strong> <span id="modalDeviceSerial"></span>
+        <p class="mb-3">Siz rostdan ham quyidagi guvohnomani <span class="fw-bold text-danger">o‘chirmoqchimisiz</span>?</p>
+
+        <ul class="list-group list-group-flush mb-3">
+          <li class="list-group-item d-flex justify-content-between">
+            <span class="fw-bold">📑 Guvohnoma raqami:</span>
+            <span id="modalCertNumber" class="text-end"></span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <span class="fw-bold">⚙️ O'lchash vositasi:</span>
+            <span id="modalDeviceName" class="text-end"></span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between">
+            <span class="fw-bold">🏭 Zavod raqami:</span>
+            <span id="modalDeviceSerial" class="text-end"></span>
+          </li>
+        </ul>
+
+        <div class="alert alert-danger d-flex align-items-center mb-0">
+          <i class="fas fa-exclamation-circle me-2"></i>
+          Diqqat! O‘chirilgan ma’lumotni qaytarib bo‘lmaydi.
+        </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Yo'q</button>
-        <a href="#" class="btn btn-danger" id="confirmDeleteBtn">Ha, o'chirish</a>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+          <i class="fas fa-times me-1"></i> Yo‘q
+        </button>
+        <a href="#" class="btn btn-danger" id="confirmDeleteBtn">
+          <i class="fas fa-check me-1"></i> Ha, o‘chirish
+        </a>
       </div>
     </div>
   </div>
@@ -28,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalDeviceSerial = document.getElementById('modalDeviceSerial');
 
     deleteModal.addEventListener('show.bs.modal', function(event) {
-        const button = event.relatedTarget; // modalni chaqirgan button
+        const button = event.relatedTarget;
         const deleteUrl = button.getAttribute('data-delete-url');
         const certNumber = button.getAttribute('data-cert-number');
         const deviceName = button.getAttribute('data-device-name');

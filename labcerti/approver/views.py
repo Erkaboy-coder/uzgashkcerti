@@ -140,50 +140,32 @@ def approve_certificate(request, pk):
 
 @login_required
 def reject_certificate(request, pk):
-    if request.method == "POST":
-        certificate = get_object_or_404(Certificate, pk=pk)
+    certificate = get_object_or_404(Certificate, pk=pk)
 
-        # Sertifikatni faqat pending (yangi) holatda bo'lsa va 
-        # foydalanuvchi huquqi bo'lsa rad etishni tekshiramiz.
-        # Qoidaga ko'ra, "approved_by" maydoni bo'sh bo'lishi kerak.
-        # UserProfile modelini tekshirish shart emas, chunki har bir approver rad etishi mumkin.
-        
+    if request.method == "POST":
         if certificate.status == 'pending':
             certificate.status = 'rejected'
-            certificate.approved_by = request.user.userprofile
+            certificate.rejected_by = request.user.userprofile  # ❗️bu yerda approved_by emas
+            certificate.rejected_at = timezone.now()
             certificate.save()
             messages.success(request, f"Sertifikat #{certificate.certificate_number} rad etildi.")
         else:
-            messages.error(request, f"Ushbu sertifikatni rad etish mumkin emas, chunki uning holati 'Yangi' emas.")
-        
-        return redirect('approver:all')
+            messages.error(request, "Faqat 'pending' holatdagi sertifikatni rad etish mumkin.")
+
+        return redirect('approver:dashboard')
+
+    # Agar GET bo'lsa → dashboardga qaytaramiz yoki 405 qaytaramiz
+    return redirect('approver:dashboard')
 
 
 @login_required
 def approver_detail(request, pk):
-    # Foydalanuvchi profilini olish
     user_profile = get_object_or_404(UserProfile, user=request.user)
-    
-    # Sertifikatni topish
+
+    # Faqat approver roliga ruxsat
+    if user_profile.role != 'approver':
+        return redirect('login')
+
     certificate = get_object_or_404(Certificate, pk=pk)
 
-    # Approver tomonidan tasdiqlangan va rad etilgan sertifikatlarni hisoblash
-    # Barcha tasdiqlash uchun yuborilgan sertifikatlar
-    all_pending_certificates = Certificate.objects.filter(status='pending')
-    
-    # Joriy approver tomonidan tasdiqlanganlar
-    approved_by_me = Certificate.objects.filter(approved_by=user_profile, status='approved')
-    
-    # Joriy approver tomonidan rad etilganlar
-    rejected_by_me = Certificate.objects.filter(approved_by=user_profile, status='rejected')
-
-    total_certificates_for_approver = all_pending_certificates.count() + approved_by_me.count() + rejected_by_me.count()
-
-    context = {
-        'certificate': certificate,
-        'total_certificates_count': total_certificates_for_approver,
-        'sent_certificates_count': all_pending_certificates.count(),
-        'approved_certificates_count': approved_by_me.count(),
-        'rejected_certificates_count': rejected_by_me.count(),
-    }
-    return render(request, 'approver/detail.html', context)
+    return render(request, 'labcerti/approver/detail.html', {'cert': certificate})
