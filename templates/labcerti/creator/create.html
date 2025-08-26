@@ -1,4 +1,4 @@
-{% extends "labcerti/base.html" %}
+|{% extends "labcerti/base.html" %}
 {% load static %}
 
 {% block title %}Sertifikat yaratish{% endblock %}
@@ -29,7 +29,7 @@
                 <h5 class="fw-semibold text-primary">Asosiy ma'lumotlar</h5>
                 <hr>
             </div>
-            
+
             {% for field in form.visible_fields %}
                 <div class="mb-3">
                     {{ field.label_tag }}
@@ -60,4 +60,23 @@
     </div>
 </div>
 
+{% endblock %}
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const innInput = document.getElementById("id_owner_inn");
+
+        if (innInput) {
+            innInput.addEventListener("input", function () {
+                // faqat raqam qoldiramiz
+                this.value = this.value.replace(/[^0-9]/g, '');
+
+                // 9 ta belgidan ortiq bo‘lsa, kesib tashlaymiz
+                if (this.value.length > 9) {
+                    this.value = this.value.slice(0, 9);
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

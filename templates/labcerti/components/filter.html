@@ -1,73 +1,85 @@
-<!-- Search Form -->
 <div class="card mb-4">
     <div class="card-header">
         <i class="fas fa-search me-1"></i>Qidiruv
     </div>
     <div class="card-body">
-        <form id="searchForm" class="row g-3" method="get"
-              action="{% if request.user.userprofile.role == 'creator' %}
-                          {% url 'creator:dashboard' %}
-                      {% else %}
-                          {% url 'approver:dashboard' %}
-                      {% endif %}">
+        <form id="searchForm" class="row g-2 align-items-end" method="get"
+              action="{% if request.user.userprofile.role == 'creator' %}{% url 'creator:dashboard' %}{% else %}{% url 'approver:dashboard' %}{% endif %}">
 
+            <!-- 1-qator: 4 ta maydon -->
             <div class="col-md-3">
-                <input type="text" class="form-control" placeholder="Guvohnoma raqami"
-                       name="certificate_number" value="{{ request.GET.certificate_number }}">
-            </div>
-            <div class="col-md-3">
-                <input type="text" class="form-control" placeholder="Egasi INN"
-                       name="owner_inn" value="{{ request.GET.owner_inn }}">
-            </div>
-            <div class="col-md-3">
-                <input type="text" class="form-control" placeholder="O‘lchash vositasi"
-                       name="device_name" value="{{ request.GET.device_name }}">
-            </div>
-            <div class="col-md-3">
-                <input type="text" class="form-control" placeholder="Zavod raqami"
-                       name="device_serial" value="{{ request.GET.device_serial }}">
+                <label class="form-label small">Guvohnoma raqami</label>
+                <input type="text" class="form-control form-control-sm"
+                       name="certificate_number" value="{{ request.GET.certificate_number }}"
+                       placeholder="Masalan: 12345">
             </div>
 
             <div class="col-md-3">
-                <select class="form-control" name="status">
+                <label class="form-label small">Kimga tegishli INNsi</label>
+                <input type="text" class="form-control form-control-sm"
+                       name="owner_inn" value="{{ request.GET.owner_inn }}"
+                       placeholder="Masalan: 123456789">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label small">O‘lchash vositasi nomi</label>
+                <input type="text" class="form-control form-control-sm"
+                       name="device_name" value="{{ request.GET.device_name }}"
+                       placeholder="Masalan: Termometr">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label small">Zavod raqami</label>
+                <input type="text" class="form-control form-control-sm"
+                       name="device_serial" value="{{ request.GET.device_serial }}"
+                       placeholder="Masalan: SN12345">
+            </div>
+
+            <!-- 2-qator: holati, qiyoslash sanasi, to_date, checkbox va tugmalar -->
+            <div class="col-md-3">
+                <label class="form-label small">Holati</label>
+                <select class="form-select form-select-sm" name="status">
                     <option value="">-- Barchasi --</option>
-
                     {% if request.user.userprofile.role == "creator" %}
-                        <option value="draft" {% if current_status == 'draft' %}selected{% endif %}>
-                            Qoralamalar
-                        </option>
+                        <option value="draft" {% if current_status == 'draft' %}selected{% endif %}>Qoralamalar</option>
                     {% endif %}
-
-                    <option value="pending" {% if current_status == 'pending' %}selected{% endif %}>
-                        Tekshiruvdagilar
-                    </option>
-                    <option value="approved" {% if current_status == 'approved' %}selected{% endif %}>
-                        Tasdiqlangan
-                    </option>
-                    <option value="rejected" {% if current_status == 'rejected' %}selected{% endif %}>
-                        Rad etilgan
-                    </option>
+                    <option value="pending" {% if current_status == 'pending' %}selected{% endif %}>Tekshiruvdagilar</option>
+                    <option value="approved" {% if current_status == 'approved' %}selected{% endif %}>Tasdiqlangan</option>
+                    <option value="rejected" {% if current_status == 'rejected' %}selected{% endif %}>Rad etilgan</option>
                 </select>
             </div>
 
             <div class="col-md-3">
-                <input type="date" class="form-control" name="from_date"
+                <label class="form-label small">Qiyoslash sanasi</label>
+                <input type="date" class="form-control form-control-sm" name="from_date"
                        value="{{ request.GET.from_date }}">
             </div>
-            <div class="col-md-3">
-                <input type="date" class="form-control" name="to_date"
+
+            <div class="col-md-3" id="toDateInputContainer" style="display: {% if request.GET.to_date %}block{% else %}none{% endif %};">
+                <label class="form-label small">gacha</label>
+                <input type="date" class="form-control form-control-sm" name="to_date"
                        value="{{ request.GET.to_date }}">
             </div>
 
-            <div class="col-md-3 d-flex">
-                <button type="submit" class="btn btn-primary me-2">Qidirish</button>
-                <a href="{% if request.user.userprofile.role == 'creator' %}
-                            {% url 'creator:dashboard' %}
-                         {% else %}
-                            {% url 'approver:dashboard' %}
-                         {% endif %}"
-                   class="btn btn-secondary">Tozalash</a>
+            <div class="col-md-3 d-flex align-items-center">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="dateRangeCheckbox" name="date_range_enabled"
+                           {% if request.GET.to_date %}checked{% endif %}>
+                    <label class="form-check-label small" for="dateRangeCheckbox">
+                        Oraliqda qidirish
+                    </label>
+                </div>
             </div>
+
+            <!-- Tugmalar har doim oxirida -->
+            <div class="col-12 d-flex gap-2 mt-2">
+                <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-search me-1"></i>Qidirish</button>
+                <a href="{% if request.user.userprofile.role == 'creator' %}{% url 'creator:dashboard' %}{% else %}{% url 'approver:dashboard' %}{% endif %}"
+                   class="btn btn-secondary btn-sm"><i class="fas fa-undo me-1"></i>Tozalash</a>
+            </div>
+
         </form>
     </div>
 </div>
+
+

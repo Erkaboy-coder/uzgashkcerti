@@ -5,29 +5,37 @@
 
 {% block content %}
 <style>
+/* Yangi CSS qoidalari */
 .card-filter {
     cursor: pointer;
     transition: 0.3s;
-    text-decoration: none; /* underline ni olib tashlash */
-    color: inherit; /* link rangini card ichidagi matnga moslashtirish */
-    display: block;
-    border-radius: 0.5rem; /* yumaloq burchak */
+    text-decoration: none;
+    color: inherit;
+    display: flex; /* Flexbox qilib o'zgartirildi */
+    flex-direction: column; /* Kontentni vertikal joylashtirish */
+    border-radius: 0.5rem;
+    height: 100%; /* Balandlikni to'liq qilish */
 }
 
 .card-filter:hover {
-    transform: translateY(-3px); /* hoverda biroz ko'tarish */
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* yumshoq soyalar */
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     text-decoration: none;
 }
 
 .card-filter.active {
-    border: 2px solid #007bff; /* active bo‘lganda border */
-    background: #e3f2fd; /* engil background */
+    border: 2px solid #007bff;
+    background: #e3f2fd;
 }
 
+.card-body.d-flex {
+    flex-grow: 1;
+    align-items: flex-start !important; /* Matn yuqoridan boshlansin */
+    justify-content: space-between !important; /* Bo'sh joyni teng taqsimlash */
+}
 
 .btn-create {
-    background-color: #28a745; /* normal rang */
+    background-color: #28a745;
     color: #fff;
     padding: 10px 20px;
     font-size: 1rem;
@@ -44,16 +52,28 @@
 .btn-create:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-    background-color: #218838; /* hover rang */
+    background-color: #218838;
     color: #fff;
+}
+
+/* Yangilangan matn uslubi */
+.card-body .text-xs {
+    /* Eski text-xs uslubi o'rniga yangisi */
+    font-size: 0.9rem; /* Yaxshiroq o'qish uchun o'lcham kattalashtirildi */
+    white-space: normal; /* Matnning keyingi qatorga o'tishini ta'minlaydi */
+    word-break: break-word; /* Uzoq so'zlarni qismlarga bo'ladi */
+}
+.card-body .h5 {
+    font-size: 1.5rem;
+}
+.card-body .fa-2x {
+    font-size: 2rem;
 }
 
 </style>
 
 
-<div class="row mb-4">
-
-    
+<div class="row">
     {% comment %}Status Cards{% endcomment %}
     <div class="col-xl-2 col-md-6 mb-2">
         <a href="{% url 'creator:dashboard' %}" class="card card-filter shadow h-100 py-2 border-left-primary {% if current_status == '' %}active{% endif %}">
@@ -83,7 +103,7 @@
         <a href="{% url 'creator:dashboard_status' 'pending' %}" class="card card-filter shadow h-100 py-2 border-left-warning {% if current_status == 'pending' %}active{% endif %}">
             <div class="card-body d-flex justify-content-between align-items-center">
                 <div>
-                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Tekshiruvdagilar</div>
+                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Tasdiqlashdagilar</div>
                     <div class="h5 mb-0 font-weight-bold text-gray-800">{{ pending_count }}</div>
                 </div>
                 <div class="text-warning"><i class="fas fa-search fa-2x"></i></div>
@@ -124,20 +144,17 @@
     </a>
 </div>
 
-
-
-
 {% include "labcerti/components/filter.html" %}
 <div class="card mb-4">
     <div class="card-header"><i class="fas fa-certificate me-1"></i> Sertifikatlar</div>
     <div class="card-body">
-        
+
         {% include "labcerti/components/table_creator.html" %}
 
         {% include "labcerti/components/delete_modal.html" %}
 
         {% include "labcerti/components/paginator.html" %}
-        
+
     </div>
 </div>
 

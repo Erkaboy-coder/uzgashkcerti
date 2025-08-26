@@ -16,6 +16,7 @@ import os
 from django.core.validators import FileExtensionValidator
 from datetime import timedelta
 from django.utils import timezone
+from django.db import transaction
 
 def validate_file_size(value):
     # Fayl hajmi 5MB dan oshmasligini tekshiradi
@@ -78,19 +79,20 @@ class Certificate(models.Model):
     ]
 
     document_type = models.CharField(max_length=255, default='GUVOHNOMASI', verbose_name="Hujjat turi")
-    certificate_number = models.CharField(max_length=255, unique=True, verbose_name="Guvohnoma raqami")
+    certificate_number = models.PositiveIntegerField(unique=True,verbose_name="Guvohnoma raqami")
     comparison_date = models.DateField(verbose_name="Qiyoslash sanasi", blank=True, null=True)
     valid_until_date = models.DateField(verbose_name="Amal qilish muddati", blank=True, null=True)
     standards_used = models.TextField(verbose_name="Etalonlar va vositalar")
     comparison_document = models.CharField(blank=True, null=True, verbose_name="qiyoslash bo'yicha xujjatning belgilanishi va nomlanishi")
-    service_provider_name = models.CharField(max_length=255, verbose_name="O'lchash vositalarini qiyoslagan metrologiya xizmatining nomi")
-    metrologist_name = models.CharField(max_length=255, verbose_name="Qiyoslovchi")
+    service_provider_name = models.CharField(max_length=255, verbose_name="O'lchash vositalarini qiyoslagan metrologiya xizmatining nomi", default="Geodezik metrologiya xizmat markazi")
+    metrologist = models.ForeignKey("UserProfile",on_delete=models.SET_NULL,null=True,related_name="metrologist_certificates",verbose_name="Qiyoslovchi")
+
     owner = models.ForeignKey("Organization", on_delete=models.CASCADE, verbose_name="Egasi", blank=True, null=True)
-    owner_inn = models.CharField(max_length=255, verbose_name="O'lchash vositalarining egasi - yuridik shaxs INNsi")
+    owner_inn = models.PositiveIntegerField(unique=True,verbose_name="O'lchash vositalarining egasi - yuridik shaxs INNsi")
     owner_name = models.CharField(max_length=255, verbose_name="O'lchash vositalarining egasi - yuridik shaxs nomi")
 
-    manufacturer = models.CharField(max_length=255, verbose_name="O'lchash vositalarini tayyorlovchi")
-    origin_country = models.CharField(max_length=255, verbose_name="O'lchash vositalarining tayyorlovchi - import qiluvchi mamlakat")
+    manufacturer = models.CharField(max_length=255, verbose_name="O'lchash vositalarini tayyorlovchi (ishlab chiqaruvchi)")
+    origin_country = models.CharField(max_length=255, verbose_name="O'lchash vositalarining tayyorlovchi (ishlab chiqaruvchi) - import qiluvchi mamlakat")
     measurement_range = models.CharField(max_length=255, verbose_name="o'lchash vositalari parametrlarining nomi, o'lchashlar")
     error_limit = models.CharField(max_length=255, verbose_name="Xatolik chegaralari, aniqlik klassi")
     device_name = models.CharField(max_length=255, verbose_name="O'lchash vositasining nomi")
@@ -122,22 +124,30 @@ class Certificate(models.Model):
     rejected_at = models.DateTimeField(blank=True, null=True, verbose_name="Rad etilgan sana")
 
     def save(self, *args, **kwargs):
-        # Sertifikat raqamini avtomatik generatsiya qilish
+        # Raqam berish
         if not self.certificate_number:
-            try:
-                last_certificate = Certificate.objects.all().order_by(F('id').desc()).first()
-                if last_certificate and last_certificate.certificate_number and last_certificate.certificate_number.isdigit():
-                    last_number = int(last_certificate.certificate_number)
-                    new_number = last_number + 1
+            with transaction.atomic():
+                last_certificate = (
+                    Certificate.objects
+                    .select_for_update(skip_locked=True)
+                    .order_by('-certificate_number')
+                    .first()
+                )
+                if last_certificate:
+                    self.certificate_number = last_certificate.certificate_number + 1
                 else:
-                    new_number = 100000
-            except (ValueError, TypeError):
-                new_number = 100000
-            self.certificate_number = str(new_number)
+                    self.certificate_number = 100000
 
-        # Amal qilish muddatini hisoblash
-        if self.comparison_date and not self.valid_until_date:
-            self.valid_until_date = self.comparison_date + timedelta(days=365)
+        # Agar comparison_date bo‘lmasa → hozirgi sana
+        if not self.comparison_date:
+            self.comparison_date = timezone.now().date()
+
+        # valid_until_date = comparison_date + 1 yil
+        self.valid_until_date = self.comparison_date + timedelta(days=365)
+
+        # metrologist = created_by foydalanuvchi
+        if self.created_by and not self.metrologist:
+            self.metrologist = self.created_by
 
         super().save(*args, **kwargs)
 

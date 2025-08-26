@@ -12,6 +12,7 @@ from django.db.models import Count
 from django.db.models.functions import ExtractMonth, ExtractYear
 from django.utils.safestring import mark_safe
 import json
+from django.db import transaction
 
 
 @login_required
@@ -106,22 +107,23 @@ def create_certificate(request):
     if request.method == 'POST':
         form = CertificateForm(request.POST, request.FILES)
         if form.is_valid():
-            cert = form.save(commit=False)
-            cert.created_by = user_profile
+            with transaction.atomic():
+                cert = form.save(commit=False)
+                cert.created_by = user_profile
 
-            # Agar POST so‘rovidan yuborish bo‘lsa, status pending
-            if 'submit_pending' in request.POST:
-                cert.status = 'pending'
-                cert.save()
-                messages.success(request, 'Sertifikat muvaffaqiyatli yuborildi!')
-                return redirect('creator:dashboard')
-            else:
-                cert.status = 'draft'  # Dastlab saqlash
-                cert.save()
-                messages.success(request, 'Sertifikat muvaffaqiyatli saqlandi!')
+                # Agar POST so‘rovidan yuborish bo‘lsa, status pending
+                if 'submit_pending' in request.POST:
+                    cert.status = 'pending'
+                    cert.save()
+                    messages.success(request, 'Sertifikat muvaffaqiyatli yuborildi!')
+                    return redirect('creator:dashboard')
+                else:
+                    cert.status = 'draft'  # Dastlab saqlash
+                    cert.save()
+                    messages.success(request, 'Sertifikat muvaffaqiyatli saqlandi!')
 
-                # Draft saqlangandan keyin edit sahifasiga yo‘naltirish
-                return redirect('creator:edit', pk=cert.pk)
+                    # Draft saqlangandan keyin edit sahifasiga yo‘naltirish
+                    return redirect('creator:edit', pk=cert.pk)
 
         else:
             messages.error(request, 'Iltimos, xatoliklarni to‘g‘rilang!')
