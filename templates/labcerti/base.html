@@ -135,10 +135,9 @@
 <body class="sb-nav-fixed">
 
     {% if messages %}
-        <div id="alert-container">
+        <div id="alert-container" style="position: fixed; top: 70px; right: 20px; z-index: 1055;">
             {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert"
-                style="opacity: 0.95; min-width: 300px; position: relative; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="min-width: 300px;">
                 {{ message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 <div class="progress-line" style="position: absolute; bottom: 0; left: 0; height: 4px; background-color: rgba(0,0,0,0.2); width: 100%;"></div>
@@ -147,12 +146,12 @@
         </div>
 
         <script>
-        window.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', () => {
             const alerts = document.querySelectorAll('#alert-container .alert');
-            alerts.forEach((alert) => {
+            alerts.forEach(alert => {
                 const progress = alert.querySelector('.progress-line');
                 let width = 100;
-                const duration = 5000;
+                const duration = 5000; // 5 soniya
                 const intervalTime = 20;
                 const decrement = (intervalTime / duration) * 100;
 
@@ -160,9 +159,8 @@
                     width -= decrement;
                     if (width <= 0) {
                         clearInterval(interval);
-                        alert.style.transition = 'opacity 0.7s, transform 0.7s';
-                        alert.style.opacity = '0';
-                        alert.style.transform = 'translateX(20px)';
+                        alert.classList.remove('show');
+                        alert.classList.add('hide');
                         setTimeout(() => alert.remove(), 700);
                     } else {
                         progress.style.width = width + '%';
@@ -171,7 +169,8 @@
             });
         });
         </script>
-    {% endif %}
+        {% endif %}
+
 
     <nav class="sb-topnav navbar navbar-expand navbar-dark">
         <a class="navbar-brand ps-3"
@@ -225,13 +224,13 @@
 
                             <a class="nav-link" href="#">
                                 <div class="sb-nav-link-icon"><i class="fas fa-file-alt"></i></div>
-                                Hujjatlar
+                                Qo'llanmalar
                             </a>
 
-                            <a class="nav-link" href="#">
-                                <div class="sb-nav-link-icon"><i class="fas fa-envelope-open-text"></i></div>
-                                Qollanmalar
-                            </a>
+{#                            <a class="nav-link" href="#">#}
+{#                                <div class="sb-nav-link-icon"><i class="fas fa-envelope-open-text"></i></div>#}
+{#                                Qollanmalar#}
+{#                            </a>#}
                         {% endif %}
                     </div>
                 </div>

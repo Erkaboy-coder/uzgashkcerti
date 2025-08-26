@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from labcerti.models import Certificate, UserProfile
+from labcerti.models import Certificate, UserProfile, Reject, Document
 from django.contrib import messages
 from django.db.models import Q
 from django.contrib import messages
@@ -137,20 +137,32 @@ def approve_certificate(request, pk):
 @login_required
 def reject_certificate(request, pk):
     certificate = get_object_or_404(Certificate, pk=pk)
-
     if request.method == "POST":
         if certificate.status == 'pending':
+            reason = request.POST.get("reason", "").strip()
+            if not reason:
+                messages.error(request, "Rad etish sababi kiritilishi shart.")
+                return redirect('approver:dashboard')
+
+            # Sertifikat holatini yangilash
             certificate.status = 'rejected'
-            certificate.rejected_by = request.user.userprofile  # ❗️bu yerda approved_by emas
-            certificate.rejected_at = timezone.now()
+            certificate.updated_at = timezone.now()
             certificate.save()
+
+            # Reject modelga yozish
+            Reject.objects.create(
+                certificate=certificate,
+                rejected_by=request.user.userprofile,
+                reason=reason
+            )
+
             messages.success(request, f"Sertifikat #{certificate.certificate_number} rad etildi.")
         else:
             messages.error(request, "Faqat 'pending' holatdagi sertifikatni rad etish mumkin.")
 
         return redirect('approver:dashboard')
 
-    # Agar GET bo'lsa → dashboardga qaytaramiz yoki 405 qaytaramiz
+    # Agar GET bo'lsa → dashboardga qaytaramiz
     return redirect('approver:dashboard')
 
 
@@ -164,4 +176,10 @@ def approver_detail(request, pk):
 
     certificate = get_object_or_404(Certificate, pk=pk)
 
-    return render(request, 'labcerti/approver/detail.html', {'cert': certificate})
+    # Reject yozuvlarini olish
+    rejections = certificate.rejections.all()  # Certificate modelidagi related_name='rejections'
+
+    return render(request, 'labcerti/approver/detail.html', {
+        'cert': certificate,
+        'rejections': rejections
+    })

@@ -36,17 +36,24 @@
                         / {{ cert.approved_by.user.username }}
                     {% endif %}
                 {% elif cert.status == 'rejected' %}
-                    {{ cert.rejected_at|date:"d.m.Y" }}
-                    {% if cert.rejected_by %}
-                        / {{ cert.rejected_by.user.username }}
-                    {% endif %}
+                    {% with last_reject=cert.rejections.first %}
+                        {% if last_reject %}
+                            {{ last_reject.created_at|date:"d.m.Y" }}
+                            {% if last_reject.rejected_by %}
+                                / {{ last_reject.rejected_by.user.username }}
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted">Ma'lumot yo‘q</span>
+                        {% endif %}
+                    {% endwith %}
                 {% else %}
                     {{ cert.created_at|date:"d.m.Y" }} / {{ cert.created_by.user.username }}
                 {% endif %}
             </td>
+
             <td>
                 {% if cert.status == 'pending' %}
-                    <span class="badge bg-warning text-dark">Tekshiruvdagilar</span>
+                    <span class="badge bg-warning text-dark">Tasdiqlashdagilar</span>
                 {% elif cert.status == 'approved' %}
                     <span class="badge bg-success">Tasdiqlangan</span>
                 {% elif cert.status == 'rejected' %}

@@ -28,6 +28,12 @@
             </li>
           </ul>
 
+          <!-- Rad etish sababi -->
+          <div class="mb-3">
+            <label for="rejectReason" class="form-label fw-bold">Rad etish sababi:</label>
+            <textarea class="form-control" id="rejectReason" name="reason" rows="3" placeholder="Iltimos sababini kiriting..." required></textarea>
+          </div>
+
           <div class="alert alert-warning d-flex align-items-center mb-0">
             <i class="fas fa-info-circle me-2"></i>
             Ushbu amalni ortga qaytarib bo‘lmaydi.
@@ -46,9 +52,6 @@
   </div>
 </div>
 
-
-
-
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const rejectButtons = document.querySelectorAll(".rejectBtn");
@@ -58,25 +61,22 @@ document.addEventListener("DOMContentLoaded", function () {
         btn.addEventListener("click", function (e) {
             e.preventDefault();
 
-            // Data atributlardan ma'lumot olish
             const certNumber = this.dataset.certNumber;
             const deviceName = this.dataset.deviceName;
             const deviceSerial = this.dataset.deviceSerial;
             const url = this.dataset.url;
 
-            // Modalni to‘ldirish
             document.getElementById("modalCertNumber").innerText = certNumber;
             document.getElementById("modalDeviceName").innerText = deviceName;
             document.getElementById("modalDeviceSerial").innerText = deviceSerial;
 
-            // Form actionni yangilash
             rejectForm.action = url;
 
-            // Modalni ochish
-            const modal = new bootstrap.Modal(document.getElementById("rejectModal"));
+            // Bootstrap 5 modalni to‘g‘ri chaqirish
+            const modalEl = document.getElementById("rejectModal");
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
             modal.show();
         });
     });
 });
 </script>
-

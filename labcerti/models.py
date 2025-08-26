@@ -28,6 +28,7 @@ class UserProfile(models.Model):
     ROLE_CHOICES = (
         ('creator', 'Creator'),
         ('approver', 'Approver'),
+        ('administrator ', 'Administrator '),
     )
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     is_center_user = models.BooleanField(default=False)
@@ -116,12 +117,10 @@ class Certificate(models.Model):
 
     created_by = models.ForeignKey("UserProfile",on_delete=models.SET_NULL,null=True,related_name="created_certificates",verbose_name="Yaratdi")
     approved_by = models.ForeignKey("UserProfile",on_delete=models.SET_NULL,null=True,blank=True,related_name="approved_certificates",verbose_name="Tasdiqladi")
-    rejected_by = models.ForeignKey("UserProfile",on_delete=models.SET_NULL,null=True,blank=True,related_name="rejected_certificates",verbose_name="Rad etdi")
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaratilgan sana")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Yangilangan sana")
     approved_at = models.DateTimeField(blank=True, null=True, verbose_name="Tasdiqlangan sana")
-    rejected_at = models.DateTimeField(blank=True, null=True, verbose_name="Rad etilgan sana")
 
     def save(self, *args, **kwargs):
         # Raqam berish
@@ -136,7 +135,7 @@ class Certificate(models.Model):
                 if last_certificate:
                     self.certificate_number = last_certificate.certificate_number + 1
                 else:
-                    self.certificate_number = 100000
+                    self.certificate_number = 100001
 
         # Agar comparison_date bo‘lmasa → hozirgi sana
         if not self.comparison_date:
@@ -194,3 +193,42 @@ class Certificate(models.Model):
 
     def __str__(self):
         return f"{self.certificate_number} ({self.get_status_display()})"
+
+
+class Reject(models.Model):
+    certificate = models.ForeignKey(
+        'Certificate',  # Sizning Certificate modeli nomi
+        on_delete=models.CASCADE,
+        related_name='rejections'
+    )
+    rejected_by = models.ForeignKey("UserProfile", on_delete=models.SET_NULL, null=True, blank=True,related_name="rejected_certificates", verbose_name="Rad etdi")
+    reason = models.TextField("Rad etish sababi")
+    created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        verbose_name = "Rad etilgan sertifikat"
+        verbose_name_plural = "Rad etilgan sertifikatlar"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.certificate} - {self.rejected_by} tomonidan rad etildi"
+
+class Document(models.Model):
+    title = models.CharField("Sarlavha", max_length=255)
+    file = models.FileField("Fayl", upload_to='data/labcerti/documents/',)
+    uploaded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='uploaded_documents'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Hujjat"
+        verbose_name_plural = "Hujjatlar"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title

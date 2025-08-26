@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import UserProfile, Organization, Certificate
+from .models import UserProfile, Organization, Certificate, Reject
 
 
 @admin.register(UserProfile)
@@ -27,3 +27,4 @@ class CertificateAdmin(admin.ModelAdmin):
     search_fields = ("certificate_number", "owner_inn", "device_name")
     ordering = ("-created_at",)
     list_display_links = ("id","certificate_number")
+

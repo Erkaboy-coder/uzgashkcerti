@@ -12,4 +12,6 @@ urlpatterns = [
     path('certificate/<int:pk>/edit/', views.edit_certificate, name='edit'),
     path('create/', views.create_certificate, name='create'),
     path('delete/<int:pk>/', views.delete_certificate, name='delete'),
+    path('resend/<int:pk>/', views.resend_rejected_certificate, name='resend_certificate'),
+
 ]

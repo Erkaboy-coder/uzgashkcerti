@@ -1,19 +1,19 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from labcerti.models import Certificate, UserProfile
+from labcerti.models import Certificate, UserProfile, Reject
 from django.core.paginator import Paginator
 from django.db.models import Q
 from labcerti.forms import CertificateForm
 from django.contrib import messages
 from django.http import Http404
 import locale
-
+from django.utils import timezone
 from django.db.models import Count
 from django.db.models.functions import ExtractMonth, ExtractYear
 from django.utils.safestring import mark_safe
 import json
 from django.db import transaction
-
+from datetime import timedelta
 
 @login_required
 def dashboard(request, status=None):
@@ -92,12 +92,73 @@ def certificate_detail(request, pk):
     # Faqat egasi ko'rishi mumkin bo'lishi
     if cert.created_by.user != request.user:
         return render(request, '403.html', status=403)
-
+    rejections = cert.rejections.all()
     context = {
         'cert': cert,
+        'rejections':rejections
     }
 
     return render(request, 'labcerti/creator/detail.html', context)
+
+
+@login_required
+def create_certificate(request, pk=None):
+    """
+    Yangi sertifikat yaratish yoki mavjud (rad etilgan) sertifikatni
+    qayta yuborish va saqlash uchun.
+    """
+    user_profile = get_object_or_404(UserProfile, user=request.user)
+
+    # Mavjud sertifikatni yuklash
+    if pk:
+        certificate = get_object_or_404(Certificate, pk=pk, created_by__user=request.user)
+    else:
+        certificate = None
+
+    if request.method == 'POST':
+        form = CertificateForm(request.POST, request.FILES, instance=certificate)
+        if form.is_valid():
+            with transaction.atomic():
+                cert = form.save(commit=False)
+                cert.created_by = user_profile
+
+                # "Yuborish" yoki "Qayta yuborish" tugmasi bosilganda
+                if 'submit_pending' in request.POST:
+                    cert.status = 'pending'
+
+                    # Agar bu rad etilgan sertifikat bo'lsa, sanalarni yangilash va xabarni o'zgartirish
+                    if certificate and certificate.status == 'rejected':
+                        cert.comparison_date = timezone.now().date()
+                        cert.valid_until_date = cert.comparison_date + timedelta(days=365)
+                        message = 'Sertifikat muvaffaqiyatli qayta yuborildi!'
+                    else:
+                        message = 'Sertifikat muvaffaqiyatli yuborildi!'
+
+                    cert.save()
+                    messages.success(request, message)
+                    return redirect('creator:dashboard')
+
+                # "Saqlash" tugmasi bosilganda
+                else:
+                    cert.status = 'draft'
+                    cert.save()
+                    messages.success(request, 'Sertifikat muvaffaqiyatli saqlandi!')
+
+                    # Draft saqlangandan keyin tahrirlash sahifasiga yo'naltirish
+                    return redirect('creator:edit', pk=cert.pk)
+
+        else:
+            messages.error(request, 'Iltimos, xatoliklarni to‘g‘rilang!')
+    else:
+        form = CertificateForm(instance=certificate)
+
+    context = {
+        'form': form,
+        'certificate': certificate,
+    }
+
+    return render(request, 'labcerti/creator/create.html', context)
+
 
 @login_required
 def create_certificate(request):
@@ -131,6 +192,27 @@ def create_certificate(request):
         form = CertificateForm()
 
     return render(request, 'labcerti/creator/create.html', {'form': form})
+
+@login_required
+def resend_rejected_certificate(request, pk):
+    """
+    Rad etilgan sertifikatni qayta yuborish view'i.
+    GET so‘rov orqali ishlaydi.
+    """
+    user_profile = get_object_or_404(UserProfile, user=request.user)
+
+    # Faqat rad etilgan sertifikatni olish
+    certificate = get_object_or_404(Certificate, pk=pk, created_by=user_profile, status='rejected')
+
+    # Qayta yuborish jarayoni
+    with transaction.atomic():
+        certificate.status = 'pending'
+        certificate.comparison_date = timezone.now().date()
+        certificate.valid_until_date = certificate.comparison_date + timedelta(days=365)
+        certificate.save()
+
+    messages.success(request, 'Sertifikat muvaffaqiyatli qayta yuborildi!')
+    return redirect('creator:dashboard')
 
 
 
