@@ -187,30 +187,30 @@
         </div>
     </div>
 
-{% if rejections %}
-<div class="col-lg-3 col-md-4 mb-4">
-    <div class="card shadow-lg border-danger rounded-4">
-        <div class="card-header bg-danger text-white">
-            <h6 class="mb-0"><i class="fas fa-exclamation-circle me-2"></i>Qaytarilish sabablari</h6>
-        </div>
-        <div class="card-body p-3">
-            <div class="list-group list-group-flush">
-                {% for rej in rejections %}
-                    <div class="list-group-item p-2">
-                        <div class="d-flex w-100 justify-content-between mb-1">
-                            <small class="text-danger fw-bold">
-                                <i class="fas fa-user-circle me-1"></i>
-                                {{ rej.rejected_by.user.get_full_name|default:rej.rejected_by.user.username }}
-                            </small>
-                            <small class="text-muted">
-                                <i class="far fa-clock me-1"></i>{{ rej.created_at|date:"d.m.Y H:i" }}
-                            </small>
+    {% if rejections %}
+    <div class="col-lg-3 col-md-4 mb-4">
+        <div class="card shadow-lg border-danger rounded-4">
+            <div class="card-header bg-danger text-white">
+                <h6 class="mb-0"><i class="fas fa-exclamation-circle me-2"></i>Qaytarilish sabablari</h6>
+            </div>
+            <div class="card-body p-3">
+                <div class="list-group list-group-flush">
+                    {% for rej in rejections %}
+                        <div class="list-group-item p-2">
+                            <div class="d-flex w-100 justify-content-between mb-1">
+                                <small class="text-danger fw-bold">
+                                    <i class="fas fa-user-circle me-1"></i>
+                                    {{ rej.rejected_by.user.get_full_name|default:rej.rejected_by.user.username }}
+                                </small>
+                                <small class="text-muted"><i class="far fa-clock me-1"></i>{{ rej.created_at|date:"d.m.Y" }}</small>
+                            </div>
+                            <p class="mb-0 small fst-italic">"{{ rej.reason }}"</p>
                         </div>
-                        <p class="mb-0 small fst-italic">"{{ rej.reason }}"</p>
-                    </div>
-                {% endfor %}
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>
+    {% endif %}
 </div>
-{% endif %}
+{% endblock %}

@@ -28,3 +28,10 @@ class CertificateAdmin(admin.ModelAdmin):
     ordering = ("-created_at",)
     list_display_links = ("id","certificate_number")
 
+
+@admin.register(Reject)
+class RejectionAdmin(admin.ModelAdmin):
+    list_display = ('certificate', 'rejected_by', 'reason', 'created_at')
+    list_filter = ('rejected_by', 'created_at')
+    search_fields = ('certificate__owner_name', 'rejected_by__user__username', 'reason')
+    ordering = ('-created_at',)
