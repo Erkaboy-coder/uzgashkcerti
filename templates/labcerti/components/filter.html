@@ -43,7 +43,7 @@
                     {% if request.user.userprofile.role == "creator" %}
                         <option value="draft" {% if current_status == 'draft' %}selected{% endif %}>Qoralamalar</option>
                     {% endif %}
-                    <option value="pending" {% if current_status == 'pending' %}selected{% endif %}>Tekshiruvdagilar</option>
+                    <option value="pending" {% if current_status == 'pending' %}selected{% endif %}>Tasdiqlashdagilar</option>
                     <option value="approved" {% if current_status == 'approved' %}selected{% endif %}>Tasdiqlangan</option>
                     <option value="rejected" {% if current_status == 'rejected' %}selected{% endif %}>Rad etilgan</option>
                 </select>
