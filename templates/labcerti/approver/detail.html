@@ -21,92 +21,104 @@
 
                 <div class="certificate-preview position-relative"
                      style="width: 210mm; height: 297mm; margin: 0 auto; padding: 30px; box-sizing: border-box;
-                            border: 10px double cornflowerblue; overflow: hidden; font-family: Arial, sans-serif;">
+                            border: 10px groove #bbe7c7;;overflow: hidden; font-family: Arial, sans-serif; background-image: url('{% static 'assets/img/bg5.png' %}'); background-repeat: repeat;">
 
-                    <div class="row mb-2 align-items-center" style="border-bottom: 4px double darkblue; padding-bottom: 5px;">
-                        <div class="col-3 d-flex justify-content-center align-items-center">
-                            <img src="{% static 'assets/logo/image.png' %}" alt="Logo" style="height: 90px; width: 90px; object-fit: contain;">
-                        </div>
-                        <div class="col-9 d-flex flex-column justify-content-center text-center">
-                            <h5 style="font-weight: bold; margin: 0; font-size: 16px;">“O‘zGASHKLITI” MCHJ Qurilishda muhandislik qidiruvlari,</h5>
-                            <h5 style="font-weight: bold; margin: 0; font-size: 16px;">geoaxborot va shaharsozlik kadastri loyiha ilmiy-tadqiqot instituti</h5>
+                    <div class="row mb-2 align-items-center">
+                        <div class="col-12 d-flex flex-column justify-content-center text-center text-primary">
+                            <h5 style="font-weight: bold; margin: 0;line-height: 32px">O‘ZBEKISTON RESPUBLIKASIDA O‘LCHASHLARNING YAGONA BIRLIKDA
+                                <br> BO'LISHINI TA’MINLASH TIZIMI</h5>
                         </div>
                     </div>
 
                     <div class="row mb-2 align-items-center">
-                        <div class="col-3 d-flex justify-content-center align-items-center">
-                            <img src="{% static 'assets/logo/logo2.png' %}" alt="Logo" style="height: 90px; width: 90px; object-fit: contain;">
-                        </div>
-                        <div class="col-9 d-flex flex-column justify-content-center text-center">
-                            <h5 style="font-weight: bold; margin: 0; font-size: 16px;">O‘ZBEKISTON RESPUBLIKASIDA O‘LCHASHLARNING YAGONA</h5>
-                            <h5 style="font-weight: bold; margin: 0; font-size: 16px;">BIRLIKDA BO'LISHINI TA’MINLASH TIZIMI</h5>
+                        <div class="col-12 d-flex flex-column justify-content-center text-center">
+                            <h5 style="border-bottom: 2px solid black">{{ cert.service_provider_name }}</h5>
+                            <i style="font-size: 12px;margin-top: -10px">(o'lchash vositasini qiyoslashni o'tkazgan metrologiya xizmatining nomi)</i>
                         </div>
                     </div>
 
-                    <div style="text-align: center; margin: 20px 0; position: relative; border-bottom: 4px double darkblue;">
+{#                    border-bottom: 4px double darkblue;#}
+                    <div style="text-align: center; position: relative; ">
+                        <p style="font-weight: bold; font-size: 20px; margin: 0;">
+                             {{ cert.certificate_number }} - son
+                        </p>
                         <h2 style="font-weight: bold; font-size: 16px; margin-bottom: 5px; letter-spacing: 1px;">
                             O‘lchash vositasini qiyoslash
                         </h2>
                         <h1 style="font-weight: bolder; font-size: 22px; color: darkblue; margin-bottom: 2px; letter-spacing: 2px;">
                             GUVOHNOMASI
                         </h1>
-                        <p style="font-weight: bold; font-size: 26px; color: darkred; margin: 0;">
-                            № {{ cert.certificate_number }}
+
+                    </div>
+
+                    <div style="text-align: right; position: relative; ">
+                        <p style="font-size: 14px">Amal qilish muddati: <br>
+                            <strong>{{ cert.valid_until_date|date:"Y" }}-yil {{ cert.valid_until_date|date:"d" }}-{{ cert.valid_until_date|date:"F" }}gacha</strong>
                         </p>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 10px 3fr; gap: 10px; font-size: 13px; margin-top: 20px; padding: 15px;
-                                word-break: break-word; overflow-wrap: break-word;">
-                        {% if cert.standards_used %}
-                            <div style="text-align: right; font-weight: bold;">Etalonlar (namunaviy o‘lchash vositalari) nomi va belgilanishi</div>
-                            <div style="text-align: center;">:</div>
-                            <div>{{ cert.standards_used }}</div>
-                        {% endif %}
-                        {% if cert.comparison_document %}
-                            <div style="text-align: right; font-weight: bold;">Qiyoslash bo‘yicha hujjat nomi va belgilanishi</div>
-                            <div style="text-align: center;">:</div>
-                            <div>{{ cert.comparison_document }}</div>
-                        {% endif %}
-                        {% if cert.owner_name %}
-                            <div style="text-align: right; font-weight: bold;">O‘lchash vositalarining egasi - yuridik shaxs </div>
-                            <div style="text-align: center;">:</div>
-                            <div>INN: {{ cert.owner_inn }}<br> nomi: {{ cert.owner_name }}</div>
-                        {% endif %}
-                        {% if cert.manufacturer %}
-                            <div style="text-align: right; font-weight: bold;">O‘lchash vositalarini tayyorlovchi</div>
-                            <div style="text-align: center;">:</div>
-                            <div>{{ cert.manufacturer }}</div>
-                        {% endif %}
-                        {% if cert.origin_country %}
-                            <div style="text-align: right; font-weight: bold;">Tayyorlovchi – import qiluvchi mamlakat</div>
-                            <div style="text-align: center;">:</div>
-                            <div>{{ cert.origin_country }}</div>
-                        {% endif %}
-                        {% if cert.measurement_range %}
-                            <div style="text-align: right; font-weight: bold;">O‘lchash vositalari parametrlari</div>
-                            <div style="text-align: center;">:</div>
-                            <div>{{ cert.measurement_range }}</div>
-                        {% endif %}
-                        {% if cert.error_limit %}
-                            <div style="text-align: right; font-weight: bold;">Xatolik chegaralari / aniqlik klassi</div>
-                            <div style="text-align: center;">:</div>
-                            <div>{{ cert.error_limit }}</div>
-                        {% endif %}
-                        {% if cert.device_name %}
-                            <div style="text-align: right; font-weight: bold;">O‘lchash vositasi</div>
-                            <div style="text-align: center;">:</div>
-                            <div>{{ cert.device_name }}</div>
-                        {% endif %}
-                        {% if cert.device_serial_numbers %}
-                            <div style="text-align: right; font-weight: bold;">Zavod raqami</div>
-                            <div style="text-align: center;">:</div>
-                            <div>{{ cert.device_serial_numbers }}</div>
-                        {% endif %}
-                        {% if cert.comparison_methodology_doc %}
-                            <div style="text-align: right; font-weight: bold;">Normativ hujjat</div>
-                            <div style="text-align: center;">:</div>
-                            <div>{{ cert.comparison_methodology_doc }}</div>
-                        {% endif %}
+
+                <div style="font-family: 'Times New Roman', Times, serif;text-align: center">
+                    <div style="text-align: left">
+                        <span>Ushbu guvohnoma <span style="font-weight: bold;border-bottom: 2px solid black">{{ cert.standards_used }} </span> foydalangan holda</span>
+                        <i style="font-size: 12px; display: block;">(etalonlar (namunaviy o'lchash vositalari)ning belgilanishi va nomi, qiyoslangan sanasi)</i>
+                    </div>
+
+                    <div>
+                        <span><span style="font-weight: bold;">{{ cert.comparison_document }} </span> ga muvofiq</span>
+                        <i style="font-size: 12px; display: block;border-top: 2px solid black">(qiyoslash bo'yicha xujjatning belgilanishi va nomlanishi)</i>
+                    </div>
+
+                    <div>
+                        <span><span style="font-weight: bold;">{{ cert.service_provider_name }} </span> tomonidan qiyoslangan</span>
+                        <i style="font-size: 12px; display: block;border-top: 2px solid black">(o'lchash vositalarini qiyoslagan metrologiya xizmatining nomi)</i>
+                    </div>
+
+                    <div>
+                        <span><span style="font-weight: bold;">{{ cert.owner_name }}</span> ga tegishli</span>
+                        <i style="font-size: 12px; display: block;border-top: 2px solid black">(o'lchash vositalarining egasi - yuridik shaxs)</i>
+                    </div>
+
+                     <div>
+                        <span><span style="font-weight: bold;">{{ cert.manufacturer }} </span></span>
+                        <i style="font-size: 12px; display: block;border-top: 2px solid black">(o'lchash vositalarini tayyorlovchi)</i>
+                    </div>
+
+                    <div>
+                        <span><span style="font-weight: bold;">{{ cert.origin_country }} </span> tomonidan tayyorlangan (import qilingan)</span>
+                        <i style="font-size: 12px; display: block;border-top: 2px solid black">(o'lchash vositalarining tayyorlovchi - import qiluvchi mamlakat)</i>
+                    </div>
+
+                    <div>
+                        <span><span style="font-weight: bold;">{{ cert.measurement_range }} </span></span>
+                        <i style="font-size: 12px; display: block;border-top: 2px solid black">(o'lchash vositalari parametrlarining nomi, o'lchashlar,</i>
+                    </div>
+
+                    <div>
+                        <span><span style="font-weight: bold;">{{ cert.error_limit }} </span>metrologik tavsifli</span>
+                        <i style="font-size: 12px; display: block;border-top: 2px solid black">xatolik chegaralari, aniqlik klassi)</i>
+                    </div>
+
+                     <div>
+                        <span><span style="font-weight: bold;">{{ cert.device_name }} {{ cert.device_serial_numbers }} </span>o'lchash vositasi</span>
+                        <i style="font-size: 12px; display: block;border-top: 2px solid black">(o'lchash vositalarining nomlanishi va belgilanishi, zavod raqami)</i>
+                    </div>
+
+                    <div>
+                        <span style="font-weight: bold;">{{ cert.comparison_methodology_doc }}</span>
+                        <i style="font-size: 12px; display: block;border-top: 2px solid black">(o'lchash vositalariga qo'yiladigan talablarni reglamentlovchi normativ xujjat belgilanishi va nomi)</i>
+                    </div>
+
+                     <div>
+                        <span><span style="font-weight: bold;">{{ cert.comparison_methodology_doc }} </span> talablariga mosligi</span>
+                        <i style="font-size: 12px; display: block;border-top: 2px solid black">(o'lchash vositalariga qo'yiladigan talablarni reglamentlovchi normativ xujjat belgilanishi va nomi) o'lchash vositasi turining ta'rifi)</i>
+                    </div>
+                    <div style="text-align: left;">
+                        <b>talablariga moslig va davlat metrologik tekshiruvi va nazorati tatbiq etilish sohasida qo'llanishiga yo'l qo'yilishini
+                            tasdiqlaydi.
+                        </b>
+                    </div>
+
                         {% if cert.protocol_file %}
                             <div style="text-align: right; font-weight: bold;">Protokol fayli</div>
                             <div style="text-align: center;">:</div>
@@ -114,43 +126,33 @@
                         {% endif %}
                     </div>
 
-                    <div style="margin-top: 25px; border-top: 4px double darkblue; padding-top: 8px; font-size: 12px; text-align: justify;">
-                        Mazkur guvohnoma o‘lchash vositalari bo‘yicha etalonlarga muvofiqlikni tasdiqlaydi va o‘lchash birliklarini belgilangan standartlarga mos holda taqdim etadi.
-                    </div>
 
-                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 50px;">
-                        <div style="display: flex; align-items: flex-end; gap: 15px;">
-                            <div style="text-align: center;">
-                                {% if cert.qr_code_image %}
-                                    <img src="{{ cert.qr_code_image.url }}" alt="QR code" style="height: 90px; width: 90px;">
-                                {% else %}
-                                    <div style="height: 90px; width: 90px; border: 1px dashed gray; display: flex; align-items: center; justify-content: center; font-size: 10px; color: gray;">
-                                        QR CODE JOY
-                                    </div>
-                                {% endif %}
-                            </div>
-                            <div style="font-size: 13px;">
-                                <p style="margin-bottom: 0;">Yaratilgan sana</p>
-                                <p style="font-weight: bold;">{{ cert.created_at|date:"d.m.Y" }}</p>
-                            </div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                            {% if cert.qr_code_image %}
+                                <img src="{{ cert.qr_code_image.url }}" alt="QR code" style="height: 90px; width: 90px;">
+                            {% else %}
+                                <div style="height: 90px; width: 90px; border: 1px dashed gray; display: flex; align-items: center; justify-content: center; font-size: 10px; color: gray;">
+                                    QR CODE JOY
+                                </div>
+                            {% endif %}
                         </div>
 
-                        <div style="font-size: 13px; text-align: center;">
-                            <p style="margin-bottom: 0;">Qiyoslovchi</p>
-                            <p style="font-weight: bold; margin-bottom: 0;">{{ cert.metrologist_name }}</p>
-                            <p style="border-top: 1px solid black; width: 100px; margin: 5px auto 0;"></p>
-                        </div>
+                        <!-- <div style="text-align: right; position: relative; ">
+                        <p style="font-size: 14px">Amal qilish muddati: <br>
+                            <strong>{{ cert.valid_until_date|date:"Y" }}-yil {{ cert.valid_until_date|date:"d" }}-{{ cert.valid_until_date|date:"F" }}gacha</strong>
+                        </p>
+                    </div> -->
+                    
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 50px;">
+                            <div style="font-size: 13px; text-align: center;">
+                                <p style="margin-bottom: 10px;font-size: 14px">Qiyoslash sanasi: <strong>{{ cert.comparison_date|date:"Y" }}-yil {{ cert.comparison_date|date:"d" }}-{{ cert.comparison_date|date:"F" }}</strong></p>
 
-                        <div style="font-size: 13px; text-align: center;">
-                            <p style="margin-bottom: 0;">Tasdiqlovchi</p>
-                            <p style="font-weight: bold; margin-bottom: 0;">
-                                {% if cert.approved_by %}
-                                    {{ cert.approved_by.user.get_full_name }}
-                                {% else %}
-                                    _________________
-                                {% endif %}
-                            </p>
-                            <p style="border-top: 1px solid black; width: 100px; margin: 5px auto 0;"></p>
+                                <p style="margin-bottom: 0;font-size: 14px">Qiyoslovchi  <strong>{{ cert.metrologist }} </strong></p>
+                                <i style="font-size: 12px; display: block;">(F.I.SH.)</i>
+
+                            </div>
+
                         </div>
                     </div>
 

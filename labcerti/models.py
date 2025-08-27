@@ -170,17 +170,20 @@ class Certificate(models.Model):
         super().save(*args, **kwargs)
 
     def generate_qr_code(self):
-        # Agar PDF fayl mavjud bo'lsa, QR o'sha faylga link beradi
-        if self.certificate_file:
-            pdf_url = settings.BASE_URL + self.certificate_file.url  # to'liq URL
-        else:
-            # Agar PDF hali yo'q bo'lsa, verify sahifaga yo'naltiradi
-            pdf_url = f"{settings.BASE_URL}/data/labcerti/certificates/{self.id}/verify/"
-
-        qr = qrcode.make(pdf_url)
+        """
+        Guvohnoma uchun QR kod generatsiya qiladi.
+        URL manzilini sertifikatning tafsilotlari sahifasiga o'rnatadi.
+        """
+        # Sertifikat tafsilotlari sahifasiga to'g'ri URL manzilini yaratish.
+        # Bu URL 'http://127.0.0.1:8000/qr_link_detail/1/' formatida bo'ladi.
+        qr_url = f"{settings.BASE_URL}/qr_link_detail/{self.certificate_number}/"
+        
+        qr = qrcode.make(qr_url)
         buffer = BytesIO()
         qr.save(buffer, format="PNG")
         filename = f"qr_{self.certificate_number}.png"
+        
+        # QR kodni modelga saqlash
         self.qr_code_image.save(filename, ContentFile(buffer.getvalue()), save=False)
 
     def generate_pdf_file(self):

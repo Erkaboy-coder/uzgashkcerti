@@ -10,289 +10,290 @@
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
-            font-size: 13px;
+            font-size: 17px;
             color: #000;
         }
         .certificate-container {
             width: 210mm;
             height: 297mm;
             margin: 0 auto;
-            padding: 10mm 20mm 60mm 20mm; /* Footer uchun joy qoldirildi */
+            padding: 30px;
             box-sizing: border-box;
-            border: 10px double cornflowerblue;
-            display: flex;
-            flex-direction: column;
-            position: relative;
+            border: 10px groove #bbe7c7;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background-image: url('{% static 'assets/img/bg5.png' %}');
+            background-repeat: repeat;
         }
-
-        /* Header */
-        .header-row {
+        .row {
             display: flex;
             flex-wrap: wrap;
-            border-bottom: 4px double darkblue;
-            padding-bottom: 5px;
-            margin-bottom: 10px;
-            justify-content: space-between;
-            align-items: center;
+            margin-bottom: 8px;
         }
-        .logo-col {
-            flex: 0 0 20%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        .col-12 {
+            width: 100%;
         }
-        .text-col-full {
-            flex: 0 0 75%;
+        .text-center {
             text-align: center;
         }
-        .text-col-full h5 {
-            margin: 0;
-            font-size: 15px;
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+        .align-items-center {
+            align-items: center;
+        }
+        .justify-content-center {
+            justify-content: center;
+        }
+        .d-flex {
+            display: flex;
+        }
+        .flex-column {
+            flex-direction: column;
+        }
+        .text-primary {
+            color: #007bff;
+        }
+        .certificate-preview h5 {
             font-weight: bold;
-            line-height: 1.4;
+            margin: 0;
+            line-height: 32px;
+        }
+        .certificate-preview i {
+            font-size: 12px;
+            margin-top: -10px;
         }
 
-        /* Title */
+        /* Title section */
         .title-section {
             text-align: center;
-            border-bottom: 4px double darkblue;
-            padding-bottom: 5px;
-            margin-bottom: 10px;
+            position: relative;
+        }
+        .title-section p {
+            font-weight: bold;
+            font-size: 20px;
+            margin: 0;
+        }
+        .title-section h2 {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
         }
         .title-section h1 {
+            font-weight: bolder;
             font-size: 22px;
             color: darkblue;
             margin-bottom: 2px;
             letter-spacing: 2px;
-            font-weight: bolder;
-        }
-        .title-section h2 {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 5px;
-            letter-spacing: 1px;
-        }
-        .title-section p {
-            margin: 0;
-            font-size: 22px;
-            color: darkred;
-            font-weight: bold;
         }
 
-        /* Details */
-        .details-grid {
-            flex: 1;
-            font-size: 13px;
-            line-height: 1.5;
-            margin-top: 5px;
-        }
-        .details-row {
-            display: flex;
-            margin-bottom: 8px;
-        }
-        .label {
-            width: 35%;
+        /* Validity section */
+        .validity-section {
             text-align: right;
-            font-weight: bold;
-            padding-right: 10px;
-            vertical-align: top;
+            position: relative;
         }
-        .colon {
-            width: 10px;
+        .validity-section p {
+            font-size: 14px;
+        }
+        .validity-section strong {
+            font-size: 14px;
+        }
+
+        /* Details section */
+        .details-section {
+            font-family: 'Times New Roman', Times, serif;
             text-align: center;
         }
-        .value {
-            width: 55%;
-            word-break: break-word;
-            overflow-wrap: break-word;
-            padding-left: 5px;
+        .details-section span {
+            font-weight: bold;
         }
-
-        /* Footer Fixed */
-        .footer-container {
-            position: absolute;
-            bottom: 10mm;
-            left: 20mm;
-            right: 20mm;
-        }
-        .footer-info {
-            border-top: 4px double darkblue;
-            padding-top: 5px;
+        .details-section i {
             font-size: 12px;
-            text-align: justify;
+            display: block;
+        }
+        .details-section .line {
+            border-bottom: 2px solid black;
+        }
+        .details-section .line-top {
+            border-top: 2px solid black;
+        }
+        .details-section .left-aligned {
+            text-align: left;
+        }
+        .details-section .file-link {
+            text-align: center;
         }
 
-        /* Signatures */
-        .signatures {
+        /* Signatures and QR */
+        .signature-section {
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
-            margin-top: 5px;
+            margin-top: 50px;
         }
-        .sign-box {
-            text-align: center;
-            font-size: 12px;
+        .signature-section .qr-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
-        .sign-box p {
-            margin: 2px 0;
-        }
-        .qr-code {
-            width: 90px;
+        .signature-section .qr-code {
             height: 90px;
-            margin-bottom: 3px;
+            width: 90px;
+        }
+        .signature-section .sign-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .signature-section .sign-details-box {
+            font-size: 13px;
+            text-align: center;
+        }
+        .signature-section .sign-details-box p {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .signature-section .sign-details-box strong {
+            font-size: 14px;
         }
 
-        /* Bottom Warning */
-        .bottom-warning {
-            margin-top: 5px;
-            font-size: 11px;
+        /* Warning */
+        .warning-section {
+            margin-top: 15px;
+            font-size: 13px;
             text-align: center;
+        }
+        .warning-section i {
             color: red;
             font-weight: bold;
         }
-
-        a { text-decoration: none; color: #007bff; }
+        span{
+            line-height: 28px;
+        }
     </style>
 </head>
 <body>
     <div class="certificate-container">
-
-        <!-- Header -->
-        <div class="header-row">
-            <div class="logo-col">
-                <img src="{% static 'assets/logo/image.png' %}" alt="Logo" style="height:80px; width:80px; object-fit:contain;">
-            </div>
-            <div class="text-col-full">
-                <h5>“O‘zGASHKLITI” MCHJ Qurilishda muhandislik qidiruvlari,</h5>
-                <h5>geoaxborot va shaharsozlik kadastri loyiha ilmiy-tadqiqot instituti</h5>
-            </div>
-            <div class="logo-col">
-                <img src="{% static 'assets/logo/logo2.png' %}" alt="Logo" style="height:80px; width:80px; object-fit:contain;">
-            </div>
-            <div class="text-col-full">
-                <h5>O‘ZBEKISTON RESPUBLIKASIDA O‘LCHASHLARNING </h5>
-                <h5>YAGONA BIRLIKDA BO'LISHINI TA’MINLASH TIZIMI</h5>
+        <div class="row mb-2 align-items-center">
+            <div class="col-12 d-flex flex-column justify-content-center text-center text-primary">
+                <h3 style="font-weight: bold; margin: 0; line-height: 32px">O‘ZBEKISTON RESPUBLIKASIDA O‘LCHASHLARNING YAGONA BIRLIKDA
+                    <br> BO'LISHINI TA’MINLASH TIZIMI</h3>
             </div>
         </div>
 
-        <!-- Title -->
+        <div class="row mb-2 align-items-center">
+            <div class="col-12 d-flex flex-column justify-content-center text-center">
+                <h5 style="border-bottom: 2px solid black">{{ cert.service_provider_name }}</h5>
+                <i style="font-size: 12px;margin-top: -10px">(o'lchash vositasini qiyoslashni o'tkazgan metrologiya xizmatining nomi)</i>
+            </div>
+        </div>
+
         <div class="title-section">
-            <h2>O‘lchash vositasini qiyoslash</h2>
-            <h1>GUVOHNOMASI</h1>
-            <p>№ {{ cert.certificate_number }}</p>
+            <p style="font-weight: bold; font-size: 20px; margin: 0;">{{ cert.certificate_number }} - son</p>
+            <h2 style="font-weight: bold; font-size: 16px; margin-bottom: 5px; letter-spacing: 1px;">
+                O‘lchash vositasini qiyoslash
+            </h2>
+            <h1 style="font-weight: bolder; font-size: 22px; color: darkblue; margin-bottom: 2px; letter-spacing: 2px;">
+                GUVOHNOMASI
+            </h1>
         </div>
 
-        <!-- Details -->
-        <div class="details-grid">
-            {% if cert.standards_used %}
-            <div class="details-row">
-                <div class="label">Etalonlar (namunaviy o‘lchash vositalari) nomi va belgilanishi</div>
-                <div class="colon">:</div>
-                <div class="value">{{ cert.standards_used }}</div>
-            </div>
-            {% endif %}
-            {% if cert.comparison_document %}
-            <div class="details-row">
-                <div class="label">Qiyoslash bo‘yicha hujjat nomi va belgilanishi</div>
-                <div class="colon">:</div>
-                <div class="value">{{ cert.comparison_document }}</div>
-            </div>
-            {% endif %}
-            {% if cert.owner_name %}
-            <div class="details-row">
-                <div class="label">O‘lchash vositalarining egasi - yuridik shaxs</div>
-                <div class="colon">:</div>
-                <div class="value">INN: {{ cert.owner_inn }}<br> Nomi: {{ cert.owner_name }}</div>
-            </div>
-            {% endif %}
-            {% if cert.manufacturer %}
-            <div class="details-row">
-                <div class="label">O‘lchash vositalarini tayyorlovchi</div>
-                <div class="colon">:</div>
-                <div class="value">{{ cert.manufacturer }}</div>
-            </div>
-            {% endif %}
-            {% if cert.origin_country %}
-            <div class="details-row">
-                <div class="label">Tayyorlovchi – import qiluvchi mamlakat</div>
-                <div class="colon">:</div>
-                <div class="value">{{ cert.origin_country }}</div>
-            </div>
-            {% endif %}
-            {% if cert.measurement_range %}
-            <div class="details-row">
-                <div class="label">O‘lchash vositalari parametrlari</div>
-                <div class="colon">:</div>
-                <div class="value">{{ cert.measurement_range }}</div>
-            </div>
-            {% endif %}
-            {% if cert.error_limit %}
-            <div class="details-row">
-                <div class="label">Xatolik chegaralari / aniqlik klassi</div>
-                <div class="colon">:</div>
-                <div class="value">{{ cert.error_limit }}</div>
-            </div>
-            {% endif %}
-            {% if cert.device_name %}
-            <div class="details-row">
-                <div class="label">O‘lchash vositasi</div>
-                <div class="colon">:</div>
-                <div class="value">{{ cert.device_name }}</div>
-            </div>
-            {% endif %}
-            {% if cert.device_serial_numbers %}
-            <div class="details-row">
-                <div class="label">Zavod raqami</div>
-                <div class="colon">:</div>
-                <div class="value">{{ cert.device_serial_numbers }}</div>
-            </div>
-            {% endif %}
-            {% if cert.comparison_methodology_doc %}
-            <div class="details-row">
-                <div class="label">Normativ hujjat</div>
-                <div class="colon">:</div>
-                <div class="value">{{ cert.comparison_methodology_doc }}</div>
-            </div>
-            {% endif %}
+        <div class="validity-section">
+            <p style="font-size: 14px">Amal qilish muddati: <br>
+                <strong>{{ cert.valid_until_date|date:"Y" }}-yil {{ cert.valid_until_date|date:"d" }}-{{ cert.valid_until_date|date:"F" }}gacha</strong>
+            </p>
         </div>
 
-        <!-- Footer Fixed -->
-        <div class="footer-container">
-            <div class="footer-info">
-                Mazkur guvohnoma o‘lchash vositalari bo‘yicha etalonlarga muvofiqlikni tasdiqlaydi va o‘lchash birliklarini belgilangan standartlarga mos holda taqdim etadi.
+        <div class="details-section">
+            <div style="text-align: left">
+                <span>Ushbu guvohnoma <span style="font-weight: bold;border-bottom: 2px solid black">{{ cert.standards_used }} </span> foydalangan holda</span>
+                <i style="font-size: 12px; display: block;">(etalonlar (namunaviy o'lchash vositalari)ning belgilanishi va nomi, qiyoslangan sanasi)</i>
             </div>
 
-            <div class="signatures">
-                <div class="sign-box">
-                    {% if cert.qr_code_image %}
-                        <img src="{{ cert.qr_code_image.url }}" alt="QR code" class="qr-code">
-                    {% else %}
-                        <div class="qr-code" style="border:1px dashed gray; display:flex; align-items:center; justify-content:center; font-size:10px;">QR CODE JOY</div>
-                    {% endif %}
-                    <p>Qiyoslash sanasi: <strong>{{ cert.comparison_date|date:"Y" }}-yil {{ cert.comparison_date|date:"d" }}-{{ cert.comparison_date|date:"F" }}</strong></p>
-                    <p>Amal qilish muddati: <strong>{{ cert.valid_until_date|date:"Y" }}-yil {{ cert.valid_until_date|date:"d" }}-{{ cert.valid_until_date|date:"F" }} gacha</strong></p>
-                </div>
-
-                <div class="sign-box">
-                    <p>Qiyoslovchi</p>
-                    <p style="font-weight:bold;">{{ cert.metrologist_name }}</p>
-                    <p style="border-top:1px solid black; width:100px; margin:5px auto 0;"></p>
-                </div>
-
-                <div class="sign-box">
-                    <p>Tasdiqlovchi</p>
-                    <p style="font-weight:bold;">
-                        {% if cert.approved_by %}{{ cert.approved_by.user.get_full_name }}{% else %}_______________{% endif %}
-                    </p>
-                    <p style="border-top:1px solid black; width:100px; margin:5px auto 0;"></p>
-                </div>
+            <div>
+                <span><span style="font-weight: bold;">{{ cert.comparison_document }} </span> ga muvofiq</span>
+                <i style="font-size: 12px; display: block;border-top: 2px solid black">(qiyoslash bo'yicha xujjatning belgilanishi va nomlanishi)</i>
             </div>
 
-            <div class="bottom-warning">
+            <div>
+                <span><span style="font-weight: bold;">{{ cert.service_provider_name }} </span> tomonidan qiyoslangan</span>
+                <i style="font-size: 12px; display: block;border-top: 2px solid black">(o'lchash vositalarini qiyoslagan metrologiya xizmatining nomi)</i>
+            </div>
+
+            <div>
+                <span><span style="font-weight: bold;">{{ cert.owner_name }}</span> ga tegishli</span>
+                <i style="font-size: 12px; display: block;border-top: 2px solid black">(o'lchash vositalarining egasi - yuridik shaxs)</i>
+            </div>
+
+             <div>
+                <span><span style="font-weight: bold;">{{ cert.manufacturer }} </span></span>
+                <i style="font-size: 12px; display: block;border-top: 2px solid black">(o'lchash vositalarini tayyorlovchi)</i>
+            </div>
+
+            <div>
+                <span><span style="font-weight: bold;">{{ cert.origin_country }} </span> tomonidan tayyorlangan (import qilingan)</span>
+                <i style="font-size: 12px; display: block;border-top: 2px solid black">(o'lchash vositalarining tayyorlovchi - import qiluvchi mamlakat)</i>
+            </div>
+
+            <div>
+                <span><span style="font-weight: bold;">{{ cert.measurement_range }} </span></span>
+                <i style="font-size: 12px; display: block;border-top: 2px solid black">(o'lchash vositalari parametrlarining nomi, o'lchashlar,</i>
+            </div>
+
+            <div>
+                <span><span style="font-weight: bold;">{{ cert.error_limit }} </span>metrologik tavsifli</span>
+                <i style="font-size: 12px; display: block;border-top: 2px solid black">xatolik chegaralari, aniqlik klassi)</i>
+            </div>
+
+             <div>
+                <span><span style="font-weight: bold;">{{ cert.device_name }} {{ cert.device_serial_numbers }} </span>o'lchash vositasi</span>
+                <i style="font-size: 12px; display: block;border-top: 2px solid black">(o'lchash vositalarining nomlanishi va belgilanishi, zavod raqami)</i>
+            </div>
+
+            <div>
+                <span style="font-weight: bold;">{{ cert.comparison_methodology_doc }}</span>
+                <i style="font-size: 12px; display: block;border-top: 2px solid black">(o'lchash vositalariga qo'yiladigan talablarni reglamentlovchi normativ xujjat belgilanishi va nomi)</i>
+            </div>
+
+             <div>
+                <span><span style="font-weight: bold;">{{ cert.comparison_methodology_doc }} </span> talablariga mosligi</span>
+                <i style="font-size: 12px; display: block;border-top: 2px solid black">(o'lchash vositalariga qo'yiladigan talablarni reglamentlovchi normativ xujjat belgilanishi va nomi) o'lchash vositasi turining ta'rifi)</i>
+            </div>
+            <div style="text-align: left;">
+                <b>talablariga mosligi va davlat metrologik tekshiruvi va nazorati tatbiq etilish sohasida qo'llanishiga yo'l qo'yilishini
+                    tasdiqlaydi.
+                </b>
+            </div>
+
+        </div>
+
+        <div class="signature-section">
+            <div class="qr-box">
+                {% if cert.qr_code_image %}
+                    <img src="{{ cert.qr_code_image.url }}" alt="QR code" style="height: 90px; width: 90px;">
+                {% else %}
+                    <div style="height: 90px; width: 90px; border: 1px dashed gray; display: flex; align-items: center; justify-content: center; font-size: 10px; color: gray;">
+                        QR CODE JOY
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="sign-details">
+                <div class="sign-details-box">
+                    <p style="margin-bottom: 10px;font-size: 14px">Qiyoslash sanasi: <strong>{{ cert.comparison_date|date:"Y" }}-yil {{ cert.comparison_date|date:"d" }}-{{ cert.comparison_date|date:"F" }}</strong></p>
+                    <p style="margin-bottom: 0;font-size: 14px">Qiyoslovchi  <strong>{{ cert.metrologist }} </strong></p>
+                    <i style="font-size: 12px; display: block;">(F.I.SH.)</i>
+                </div>
+            </div>
+        </div>
+
+        <div class="warning-section">
+            <i style="color: red; font-weight: bold;">
                 Mazkur guvohnomani qalbakilashtirish - qonunga muvofiq javobgarlikka tortiladi.
-            </div>
+            </i>
         </div>
-
     </div>
 </body>
 </html>

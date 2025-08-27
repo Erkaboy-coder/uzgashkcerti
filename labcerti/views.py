@@ -223,6 +223,14 @@ def certificate_detail(request, pk):
 def custom_404_view(request, exception):
     return render(request, 'labcerti/404.html', status=404)
 
+def test(request, pk):
+    cert = get_object_or_404(Certificate, pk=pk)
+    return render(request, 'labcerti/certificates/certificate_template.html', {"cert": cert})
+
+def qr_link_detail(request, certificate_number):
+    cert = get_object_or_404(Certificate, certificate_number=certificate_number)
+    return render(request, 'labcerti/certificates/qr_detail.html', {"cert": cert})
+
 def user_logout(request):
     logout(request)
     return redirect('login')
