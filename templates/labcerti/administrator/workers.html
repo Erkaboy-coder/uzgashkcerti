@@ -104,6 +104,7 @@
                     <th>#</th>
                     <th>Username</th>
                     <th>Ism Familiya</th>
+                    <th>Email</th>
                     <th>Rol</th>
                     <th>Holat</th>
                     <th>Amallar</th>
@@ -115,6 +116,7 @@
                     <td>{{ forloop.counter }}</td>
                     <td>{{ w.user.username }}</td>
                     <td>{{ w.user.first_name }} {{ w.user.last_name }}</td>
+                    <td>{{ w.user.email }}</td>
                     <td>{{ w.role|title }}</td>
                     <td>
                         {% if w.is_deleted %}
@@ -149,7 +151,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="text-center text-muted">Xodim topilmadi</td>
+                    <td colspan="7" class="text-center text-muted">Xodim topilmadi</td>
                 </tr>
                 {% endfor %}
             </tbody>
