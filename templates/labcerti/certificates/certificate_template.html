@@ -19,7 +19,7 @@
             margin: 0 auto;
             padding: 30px;
             box-sizing: border-box;
-            border: 10px groove #bbe7c7;
+            border: 10px solid #2a8e44; /* Bu yerda o'zgarish kiritildi */
             overflow: hidden;
             font-family: Arial, sans-serif;
             background-image: url('{% static 'assets/img/bg5.png' %}');
@@ -185,7 +185,7 @@
 
         <div class="row mb-2 align-items-center">
             <div class="col-12 d-flex flex-column justify-content-center text-center">
-                <h5 style="border-bottom: 2px solid black">{{ cert.service_provider_name }}</h5>
+                <h3 style="border-bottom: 2px solid black">{{ cert.service_provider_name }}</h3>
                 <i style="font-size: 12px;margin-top: -10px">(o'lchash vositasini qiyoslashni o'tkazgan metrologiya xizmatining nomi)</i>
             </div>
         </div>
@@ -272,7 +272,7 @@
         <div class="signature-section">
             <div class="qr-box">
                 {% if cert.qr_code_image %}
-                    <img src="{{ cert.qr_code_image.url }}" alt="QR code" style="height: 90px; width: 90px;">
+                    <img src="{{ cert.qr_code_image.url }}" alt="QR code" style="height: 130px; width: 130px;">
                 {% else %}
                     <div style="height: 90px; width: 90px; border: 1px dashed gray; display: flex; align-items: center; justify-content: center; font-size: 10px; color: gray;">
                         QR CODE JOY
@@ -282,9 +282,9 @@
             
             <div class="sign-details">
                 <div class="sign-details-box">
-                    <p style="margin-bottom: 10px;font-size: 14px">Qiyoslash sanasi: <strong>{{ cert.comparison_date|date:"Y" }}-yil {{ cert.comparison_date|date:"d" }}-{{ cert.comparison_date|date:"F" }}</strong></p>
-                    <p style="margin-bottom: 0;font-size: 14px">Qiyoslovchi  <strong>{{ cert.metrologist }} </strong></p>
-                    <i style="font-size: 12px; display: block;">(F.I.SH.)</i>
+                    <p style="margin-bottom: 20px;font-size: 14px">Qiyoslash sanasi: <strong>{{ cert.comparison_date|date:"Y" }}-yil {{ cert.comparison_date|date:"d" }}-{{ cert.comparison_date|date:"F" }}</strong></p>
+                    <p style="margin-bottom: 4px;font-size: 14px">Qiyoslovchi  <strong>{{ cert.metrologist }} </strong></p>
+                    <i style="font-size: 12px;margin-bottom: 10px; display: block;">(F.I.SH.)</i>
                 </div>
             </div>
         </div>

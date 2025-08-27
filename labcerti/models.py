@@ -168,19 +168,30 @@ class Certificate(models.Model):
             self.metrologist = self.created_by
 
         super().save(*args, **kwargs)
-
     def generate_qr_code(self):
         """
-        Guvohnoma uchun QR kod generatsiya qiladi.
-        URL manzilini sertifikatning tafsilotlari sahifasiga o'rnatadi.
+        Berilgan certificate_number asosida bordersiz QR kod generatsiya qiladi
+        va uni modelga saqlaydi.
         """
         # Sertifikat tafsilotlari sahifasiga to'g'ri URL manzilini yaratish.
         # Bu URL 'http://127.0.0.1:8000/qr_link_detail/1/' formatida bo'ladi.
         qr_url = f"{settings.BASE_URL}/qr_link_detail/{self.certificate_number}/"
         
-        qr = qrcode.make(qr_url)
+        # QR kod obyektini bordersiz yaratish
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_L,
+            box_size=10,
+            border=0,  # Chegarasiz bo'lishi uchun border=0
+        )
+        
+        qr.add_data(qr_url)
+        qr.make(fit=True)
+        
+        img = qr.make_image(fill_color="black", back_color="white")
+        
         buffer = BytesIO()
-        qr.save(buffer, format="PNG")
+        img.save(buffer, format="PNG")
         filename = f"qr_{self.certificate_number}.png"
         
         # QR kodni modelga saqlash
