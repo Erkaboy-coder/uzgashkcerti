@@ -1,0 +1,251 @@
+{% extends "labcerti/base.html" %}
+{% block title %}Xodimlar{% endblock %}
+{% block page_title %}Xodimlar boshqaruvi{% endblock %}
+{% block breadcrumb %}Xodimlar{% endblock %}
+
+{% block content %}
+<style>
+.card-filter {
+    cursor: pointer;
+    transition: 0.3s;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    border-radius: 0.5rem;
+}
+.card-filter:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+.card-filter.active {
+    border: 2px solid #007bff;
+    background: #e3f2fd;
+}
+.card-filter .card-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+}
+.card-filter .text-container {
+    flex-grow: 1;
+}
+</style>
+
+<div class="row mb-4">
+    <!-- Barchasi -->
+    <div class="col-xl-3 col-md-6 mb-2">
+        <a href="{% url 'administrator:workers_list' %}"
+           class="card card-filter shadow h-100 border-left-primary {% if current_status == 'all' and not show_deleted %}active{% endif %}">
+            <div class="card-body">
+                <div class="text-container">
+                    <div class="text-xs text-primary text-uppercase mb-1">Barchasi</div>
+                    <div class="h5 mb-0 fw-bold text-dark">{{ total_count }}</div>
+                </div>
+                <div class="text-primary"><i class="fas fa-users fa-2x"></i></div>
+            </div>
+        </a>
+    </div>
+    <!-- Faol -->
+    <div class="col-xl-3 col-md-6 mb-2">
+        <a href="?status=active"
+           class="card card-filter shadow h-100 border-left-success {% if current_status == 'active' %}active{% endif %}">
+            <div class="card-body">
+                <div class="text-container">
+                    <div class="text-xs text-success text-uppercase mb-1">Faol</div>
+                    <div class="h5 mb-0 fw-bold text-dark">{{ active_count }}</div>
+                </div>
+                <div class="text-success"><i class="fas fa-user-check fa-2x"></i></div>
+            </div>
+        </a>
+    </div>
+    <!-- Faol emas -->
+    <div class="col-xl-3 col-md-6 mb-2">
+        <a href="?status=inactive"
+           class="card card-filter shadow h-100 border-left-warning {% if current_status == 'inactive' %}active{% endif %}">
+            <div class="card-body">
+                <div class="text-container">
+                    <div class="text-xs text-warning text-uppercase mb-1">Faol emas</div>
+                    <div class="h5 mb-0 fw-bold text-dark">{{ inactive_count }}</div>
+                </div>
+                <div class="text-warning"><i class="fas fa-user-times fa-2x"></i></div>
+            </div>
+        </a>
+    </div>
+    <!-- O‘chirilgan -->
+    <div class="col-xl-3 col-md-6 mb-2">
+        <a href="?deleted=1"
+           class="card card-filter shadow h-100 border-left-danger {% if show_deleted %}active{% endif %}">
+            <div class="card-body">
+                <div class="text-container">
+                    <div class="text-xs text-danger text-uppercase mb-1">O‘chirilgan</div>
+                    <div class="h5 mb-0 fw-bold text-dark">{{ deleted_count }}</div>
+                </div>
+                <div class="text-danger"><i class="fas fa-trash fa-2x"></i></div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- 🔹 Jadval -->
+<div class="card shadow mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-users me-1"></i> Xodimlar</span>
+        {% if not show_deleted %}
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createWorkerModal">
+            <i class="fas fa-plus"></i> Yangi xodim
+        </button>
+        {% endif %}
+    </div>
+    <div class="card-body table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Username</th>
+                    <th>Ism Familiya</th>
+                    <th>Rol</th>
+                    <th>Holat</th>
+                    <th>Amallar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for w in workers %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ w.user.username }}</td>
+                    <td>{{ w.user.first_name }} {{ w.user.last_name }}</td>
+                    <td>{{ w.role|title }}</td>
+                    <td>
+                        {% if w.is_deleted %}
+                            <span class="badge bg-secondary"><i class="fas fa-trash"></i> O‘chirilgan</span>
+                        {% elif w.status == 'active' %}
+                            <span class="badge bg-success"><i class="fas fa-check-circle"></i> Active</span>
+                        {% else %}
+                            <span class="badge bg-danger"><i class="fas fa-times-circle"></i> Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if not w.is_deleted %}
+                            {% if w.status == 'active' %}
+                                <a href="{% url 'administrator:worker_toggle_status' w.id %}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-user-slash"></i> Deaktiv
+                                </a>
+                            {% else %}
+                                <a href="{% url 'administrator:worker_toggle_status' w.id %}" class="btn btn-sm btn-success">
+                                    <i class="fas fa-user-check"></i> Aktiv
+                                </a>
+                            {% endif %}
+                            <a href="{% url 'administrator:worker_detail' w.id %}" class="btn btn-info btn-sm">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'administrator:worker_delete' w.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Haqiqatan ham o‘chirmoqchimisiz?')">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        {% else %}
+                            <span class="text-muted">–</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted">Xodim topilmadi</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<!-- 🔹 Yangi xodim qo‘shish modal -->
+<div class="modal fade" id="createWorkerModal" tabindex="-1" aria-labelledby="createWorkerLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form id="workerCreateForm" method="post" action="{% url 'administrator:worker_create' %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="createWorkerLabel"><i class="fas fa-user-plus"></i> Yangi xodim yaratish</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Yopish"></button>
+        </div>
+        <div class="modal-body">
+            <div class="mb-3">
+                <label for="id_username" class="form-label">Username (Login)</label>
+                <input type="text" name="username" id="id_username" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="id_first_name" class="form-label">Ism</label>
+                <input type="text" name="first_name" id="id_first_name" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label for="id_last_name" class="form-label">Familiya</label>
+                <input type="text" name="last_name" id="id_last_name" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label for="id_email" class="form-label">Email</label>
+                <input type="email" name="email" id="id_email" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="id_role" class="form-label">Rol</label>
+                <select name="role" id="id_role" class="form-select" required>
+                    <option value="creator">Creator</option>
+                    <option value="approver">Approver</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="id_contact" class="form-label">Telefon raqami</label>
+                <input type="text" name="contact" id="id_contact" class="form-control" placeholder="+998901234567">
+            </div>
+            <small class="text-muted"><i class="fas fa-info-circle"></i> Login va email orqali kirish mumkin. Parol bu foydalanuvchi emaili , login esa Username va foydalanuvchi tizimga kirgach uni almashtirishi mumkin bo'ladi.</small>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bekor qilish</button>
+          <button type="submit" id="createBtn" class="btn btn-primary">
+              <i class="fas fa-plus"></i> Yaratish
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById("workerCreateForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    let form = this;
+    let formData = new FormData(form);
+
+    let btn = document.getElementById("createBtn");
+    let originalHtml = btn.innerHTML;
+
+    // 🔄 Loading holatiga o‘tkazamiz
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Yuklanmoqda...';
+
+    fetch(form.action, {
+        method: "POST",
+        body: formData,
+        headers: {"X-Requested-With": "XMLHttpRequest"},
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.success){
+            location.reload(); // sahifa yangilanadi
+        } else {
+            alert("Xatolik: " + JSON.stringify(data.errors));
+            // 🔙 Tugmani qayta tiklash
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }
+    })
+    .catch(err => {
+        console.error("Xatolik:", err);
+        // 🔙 Tugmani qayta tiklash
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+    });
+});
+</script>
+
+
+{% endblock %}

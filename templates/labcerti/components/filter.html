@@ -4,7 +4,7 @@
     </div>
     <div class="card-body">
         <form id="searchForm" class="row g-2 align-items-end" method="get"
-              action="{% if request.user.userprofile.role == 'creator' %}{% url 'creator:dashboard' %}{% else %}{% url 'approver:dashboard' %}{% endif %}">
+              action="{% if request.user.userprofile.role == 'creator' %}{% url 'creator:dashboard' %}{% elif request.user.userprofile.role == 'administrator' %}{% url 'administrator:dashboard' %}{% else %}{% url 'approver:dashboard' %}{% endif %}">
 
             <!-- 1-qator: 4 ta maydon -->
             <div class="col-md-3">
@@ -71,15 +71,26 @@
                 </div>
             </div>
 
+{#            {% if request.user.userprofile.role == 'administrator' %}#}
+{#                <!-- 3-qator: xodim bo'yicha filter -->#}
+{#                <div class="col-md-3">#}
+{#                    <label class="form-label small">Xodim</label>#}
+{#                    <select class="form-select form-select-sm" name="employee">#}
+{#                        <option value="">-- Barchasi --</option>#}
+{#                        {% for emp in employees %}#}
+{#                            <option value="{{ emp.id }}" {% if request.GET.employee == emp.id|stringformat:"s" %}selected{% endif %}>{{ emp.user.username }} ({{ emp.role }})</option>#}
+{#                        {% endfor %}#}
+{#                    </select>#}
+{#                </div>#}
+{#            {% endif %}#}
+
             <!-- Tugmalar har doim oxirida -->
             <div class="col-12 d-flex gap-2 mt-2">
                 <button type="submit" class="btn btn-primary btn-sm"><i class="fas fa-search me-1"></i>Qidirish</button>
-                <a href="{% if request.user.userprofile.role == 'creator' %}{% url 'creator:dashboard' %}{% else %}{% url 'approver:dashboard' %}{% endif %}"
+                <a href="{% if request.user.userprofile.role == 'creator' %}{% url 'creator:dashboard' %}{% elif request.user.userprofile.role == 'administrator' %}{% url 'administrator:dashboard' %}{% else %}{% url 'approver:dashboard' %}{% endif %}"
                    class="btn btn-secondary btn-sm"><i class="fas fa-undo me-1"></i>Tozalash</a>
             </div>
 
         </form>
     </div>
 </div>
-
-

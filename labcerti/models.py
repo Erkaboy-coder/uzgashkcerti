@@ -23,27 +23,46 @@ def validate_file_size(value):
     limit = 5 * 1024 * 1024
     if value.size > limit:
         raise ValidationError('Fayl hajmi 5 MB dan oshmasligi kerak.')
-    
+
+class ActiveUserProfileManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
 class UserProfile(models.Model):
     ROLE_CHOICES = (
         ('creator', 'Creator'),
         ('approver', 'Approver'),
-        ('administrator ', 'Administrator '),
+        ('administrator', 'Administrator'),
     )
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     is_center_user = models.BooleanField(default=False)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='creator')
-    contact = models.CharField(max_length=50, blank=True, null=True,
-    validators=[
-        RegexValidator(r'^\+?\d{9,15}$', "Telefon raqami to'g'ri formatda emas.")
-    ])
+    contact = models.CharField(
+        max_length=50, blank=True, null=True,
+        validators=[RegexValidator(r'^\+?\d{9,15}$', "Telefon raqami to'g'ri formatda emas.")]
+    )
+
     STATUS_CHOICES = [
         ('active', 'Faol'),
         ('inactive', 'Faol emas'),
     ]
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES,
+        default='active', verbose_name="Faollik holati"
+    )
 
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active', verbose_name="Faollik holati")
+    # 🔹 soft delete
+    is_deleted = models.BooleanField(default=False)
 
+    # managers
+    objects = models.Manager()  # default
+    active_objects = ActiveUserProfileManager()  # faqat is_deleted=False
+
+    def delete(self, *args, **kwargs):
+        """Soft delete – bazadan o‘chirib yubormaydi"""
+        self.is_deleted = True
+        self.save()
 
     def __str__(self):
         return f"{self.user.username} - {self.role}"

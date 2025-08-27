@@ -219,7 +219,21 @@
             <nav class="sb-sidenav accordion card" id="sidenavAccordion">
                 <div class="sb-sidenav-menu">
                     <div class="nav">
-                        {% if request.user.is_authenticated and request.user.userprofile.is_center_user %}
+                        {% if request.user.userprofile.role == 'administrator' %}
+                            <div class="sb-sidenav-menu-heading">Administrator</div>
+{#                            <a class="nav-link" href="{% url 'administrator:dashboard' %}">#}
+{#                                <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>#}
+{#                                Sertifikatlar#}
+{#                            </a>#}
+                            <a class="nav-link" href="{% url 'administrator:workers_list' %}">
+                                <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                                Xodimlar
+                            </a>
+                            <a class="nav-link" href="#">
+                                <div class="sb-nav-link-icon"><i class="fas fa-envelope-open-text"></i></div>
+                                Xabarlar
+                            </a>
+                        {% elif request.user.userprofile.is_center_user %}
                             <div class="sb-sidenav-menu-heading">Markaz</div>
                             <a class="nav-link" href="{% url 'index' %}">
                                 <div class="sb-nav-link-icon"><i class="fas fa-certificate"></i></div>
@@ -244,8 +258,10 @@
                                 Xabarlar
                             </a>
                         {% endif %}
+
                     </div>
                 </div>
+
 
                 <div class="sb-sidenav-footer">
                     <div class="small">Tizimda: <strong>{{ request.user.username|default:"Mehmon" }}</strong></div>
@@ -261,8 +277,8 @@
                 </div>
             </main>
 
-            <footer class="py-4 mt-auto">
-                <div class="container-fluid px-4">
+            <footer class=" mt-auto">
+                <div class="container-fluid">
                     <div class="d-flex flex-column flex-md-row align-items-center justify-content-between small">
                         <div class="text-muted mb-2 mb-md-0">
                             &copy; <span id="currentYear"></span> UZGASHKLITI. Barcha huquqlar himoyalangan.

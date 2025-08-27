@@ -1,6 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 import re
+from django.utils.crypto import get_random_string
 
 from .models import Certificate, Organization, UserProfile
 from django.contrib.auth.models import User
@@ -89,3 +90,43 @@ class UserProfileForm(forms.ModelForm):
         model = UserProfile
         # Foydalanuvchi faqat o'z kontakt raqamini o'zgartira oladi
         fields = ['contact']
+
+
+class WorkerCreateForm(forms.ModelForm):
+    username = forms.CharField(max_length=150, label="Login")
+    first_name = forms.CharField(max_length=150, required=False, label="Ism")
+    last_name = forms.CharField(max_length=150, required=False, label="Familiya")
+    email = forms.EmailField(label="Email (parol sifatida ham ishlatiladi)")
+
+    class Meta:
+        model = UserProfile
+        fields = ['role', 'contact']
+
+    def save(self, commit=True):
+        username = self.cleaned_data['username']
+        first_name = self.cleaned_data.get('first_name', '')
+        last_name = self.cleaned_data.get('last_name', '')
+        email = self.cleaned_data['email']
+        role = self.cleaned_data['role']
+        contact = self.cleaned_data.get('contact', '')
+
+        # 🔑 Parol email bo‘lsin
+        password = email
+
+        # Yangi User yaratamiz
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password,
+            first_name=first_name,
+            last_name=last_name,
+        )
+
+        # UserProfile yaratamiz
+        profile = UserProfile.objects.create(
+            user=user,
+            role=role,
+            contact=contact,
+            status="active"
+        )
+        return user, profile, password

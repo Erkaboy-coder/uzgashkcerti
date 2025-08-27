@@ -1,0 +1,90 @@
+<table class="table table-hover align-middle mb-0 text-center" id="certTable">
+    <thead class="table-light">
+        <tr>
+            <th>#</th>
+            <th>Guvohnoma raqami</th>
+            <th>Kimga tegishli (INN)</th>
+            <th>O'lchash vositasi</th>
+            <th>Zavod raqami</th>
+            <th>
+                {% if current_status == 'approved' %}
+                    Tasdiqlangan sana / Kim tasdiqladi
+                {% elif current_status == 'rejected' %}
+                    Rad etilgan sana / Kim rad etdi
+                {% else %}
+                    Yaratilgan sana / Kim yaratdi
+                {% endif %}
+            </th>
+            <th>Holati</th>
+            <th>PDF/QR</th>
+            <th>Protokol</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        {% for cert in certificates %}
+        <tr data-status="{{ cert.status }}">
+            <th>{{ page_obj.start_index|add:forloop.counter0 }}</th>
+            <td>{{ cert.certificate_number }}</td>
+            <td>{{ cert.owner_name }} ({{ cert.owner_inn }})</td>
+            <td>{{ cert.device_name }}</td>
+            <td>{{ cert.device_serial_numbers }}</td>
+            <td>
+                {% if cert.status == 'approved' %}
+                    {{ cert.approved_at|date:"d.m.Y" }}
+                    {% if cert.approved_by %}
+                        / {{ cert.approved_by.user.username }}
+                    {% endif %}
+                {% elif cert.status == 'rejected' %}
+                    {% with last_reject=cert.rejections.first %}
+                        {% if last_reject %}
+                            {{ last_reject.created_at|date:"d.m.Y" }}
+                            {% if last_reject.rejected_by %}
+                                / {{ last_reject.rejected_by.user.username }}
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted">Ma'lumot yo‘q</span>
+                        {% endif %}
+                    {% endwith %}
+                {% else %}
+                    {{ cert.created_at|date:"d.m.Y" }} / {{ cert.created_by.user.username }}
+                {% endif %}
+            </td>
+
+            <td>
+                {% if cert.status == 'pending' %}
+                    <span class="badge bg-warning text-dark">Tasdiqlashdagilar</span>
+                {% elif cert.status == 'approved' %}
+                    <span class="badge bg-success">Tasdiqlangan</span>
+                {% elif cert.status == 'rejected' %}
+                    <span class="badge bg-danger">Rad etilgan</span>
+                {% elif cert.status == 'draft' and request.user.userprofile.role != 'approver' %}
+                    <span class="badge bg-secondary">Qoralama</span>
+                {% endif %}
+            </td>
+
+            <td class="text-center">
+                {% if cert.certificate_file %}
+                    <a href="{{ cert.certificate_file.url }}" target="_blank">📄 PDF</a>
+                {% else %}
+                    <span class="text-muted">PDF Jarayonda</span>
+                {% endif %}
+                /
+                {% if cert.qr_code_image %}
+                    <a href="{{ cert.qr_code_image.url }}" target="_blank">🖼️ QR</a>
+                {% else %}
+                    <span class="text-muted">QR Jarayonda</span>
+                {% endif %}
+            </td>
+            <td class="text-center">
+                {% if cert.protocol_file %}
+                    <a href="{{ cert.protocol_file.url }}" target="_blank">📄 Protokol</a>
+                {% else %}
+                    <span class="text-muted">Mavjud emas</span>
+                {% endif %}
+            </td>
+
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

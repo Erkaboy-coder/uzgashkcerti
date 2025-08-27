@@ -17,6 +17,7 @@ urlpatterns = [
     path('profile/', views.user_profile, name='profile'),
     path('creator/', include('labcerti.creator.urls')),
     path('approver/', include('labcerti.approver.urls')),
+    path('administrator/', include('labcerti.administrator.urls')),
 
     path('search/', views.public_certificate_search, name='public_search'),
     path('', lambda request: redirect('login')),

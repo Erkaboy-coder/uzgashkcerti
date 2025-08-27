@@ -95,18 +95,21 @@ def login_page(request):
     if request.user.is_authenticated:
         try:
             profile = UserProfile.objects.get(user=request.user)
-            if profile.status == 'active':
-                # Foydalanuvchi profili faol bo'lsa, rolga qarab yo'naltiramiz
-                if profile.role == 'creator':
-                    return redirect('creator:dashboard')
-                elif profile.role == 'approver':
-                    return redirect('approver:dashboard')
-                else:
-                    return redirect('index')
-            else:
+            if profile.status != 'active':
                 messages.error(request, "Sizning profilingiz nofaol. Administratorga murojaat qiling.")
                 logout(request)
                 return redirect('login')
+
+            # Rolga qarab yo'naltirish
+            if profile.role == 'creator':
+                return redirect('creator:dashboard')
+            elif profile.role == 'approver':
+                return redirect('approver:dashboard')
+            elif profile.role.strip() == 'administrator':
+                return redirect('administrator:dashboard')
+            else:
+                return redirect('index')
+
         except UserProfile.DoesNotExist:
             messages.error(request, "Sizning profilingiz topilmadi. Administratorga murojaat qiling.")
             logout(request)
@@ -130,13 +133,17 @@ def login_page(request):
                         request.session.set_expiry(86400)  # 1 kun
                     else:
                         request.session.set_expiry(0)
+
                     # Rolga qarab yo'naltirish
                     if profile.role == 'creator':
                         return redirect('creator:dashboard')
                     elif profile.role == 'approver':
                         return redirect('approver:dashboard')
+                    elif profile.role.strip() == 'administrator':
+                        return redirect('administrator:workers_list')
                     else:
                         return redirect('index')
+
             except UserProfile.DoesNotExist:
                 error = "Sizning profilingiz topilmadi. Administratorga murojaat qiling."
         else:
