@@ -15,6 +15,7 @@ import os
 from django.core.paginator import Paginator
 from datetime import timedelta
 from django.utils import timezone
+from django.http import HttpRequest
 
 @login_required
 def dashboard(request, status=None):
@@ -113,7 +114,7 @@ def approve_certificate(request, pk):
                         print("QR kod faylini o'chirishda xato:", e)
 
                 certificate.generate_qr_code()
-                certificate.generate_pdf_file()
+                certificate.generate_pdf_file(request)
 
                 certificate.save()
 

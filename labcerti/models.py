@@ -7,7 +7,6 @@ from io import BytesIO
 import qrcode
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.template.loader import render_to_string
-from weasyprint import HTML
 import qrcode
 from django.core.files.base import ContentFile
 from io import BytesIO
@@ -17,6 +16,13 @@ from django.core.validators import FileExtensionValidator
 from datetime import timedelta
 from django.utils import timezone
 from django.db import transaction
+from django.templatetags.static import static
+from weasyprint import HTML, CSS
+from xhtml2pdf import pisa
+from django.http import HttpRequest
+
+from django.contrib.staticfiles import finders
+
 
 def validate_file_size(value):
     # Fayl hajmi 5MB dan oshmasligini tekshiradi
@@ -27,6 +33,21 @@ def validate_file_size(value):
 class ActiveUserProfileManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(is_deleted=False)
+
+
+def link_callback(uri, rel):
+    if uri.startswith(settings.STATIC_URL):
+        path = os.path.join(settings.STATIC_ROOT, uri.replace(settings.STATIC_URL, ""))
+        return path
+
+    # Agar media fayllarining URL-lari boshqa domen yoki papkada bo'lsa, bu shartni qo'shing
+    if uri.startswith('/media/'):
+        path = os.path.join(settings.MEDIA_ROOT, uri.replace('/media/', ''))
+        return path
+
+    return uri
+
+
 
 class UserProfile(models.Model):
     ROLE_CHOICES = (
@@ -168,64 +189,71 @@ class Certificate(models.Model):
             self.metrologist = self.created_by
 
         super().save(*args, **kwargs)
+
     def generate_qr_code(self):
-        """
-        Berilgan certificate_number asosida bordersiz QR kod generatsiya qiladi
-        va uni modelga saqlaydi.
-        """
-        # Sertifikat tafsilotlari sahifasiga to'g'ri URL manzilini yaratish.
-        # Bu URL 'http://127.0.0.1:8000/qr_link_detail/1/' formatida bo'ladi.
         qr_url = f"{settings.BASE_URL}/qr_link_detail/{self.certificate_number}/"
-        
-        # QR kod obyektini bordersiz yaratish
+
         qr = qrcode.QRCode(
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
             box_size=10,
-            border=0,  # Chegarasiz bo'lishi uchun border=0
+            border=0,
         )
-        
         qr.add_data(qr_url)
         qr.make(fit=True)
-        
+
         img = qr.make_image(fill_color="black", back_color="white")
-        
+
         buffer = BytesIO()
         img.save(buffer, format="PNG")
         filename = f"qr_{self.certificate_number}.png"
-        
-        # QR kodni modelga saqlash
+
         self.qr_code_image.save(filename, ContentFile(buffer.getvalue()), save=False)
 
-    def generate_pdf_file(self):
-        # Agar eski PDF mavjud bo'lsa, uni o'chirish
+    def generate_pdf_file(self, request: HttpRequest):
+        """ HTML shablondan PDF yaratib, `certificate_file` fieldga saqlash """
         if self.certificate_file and os.path.exists(self.certificate_file.path):
             os.remove(self.certificate_file.path)
 
+        # Veb-server tushunadigan URL-manzillar ishlatiladi
+        qr_url = self.qr_code_image.url if self.qr_code_image else None
+        bg_url = settings.STATIC_URL + 'assets/img/bg5.png'
+        font_url = settings.STATIC_URL + 'fonts/DejaVuSans.ttf'
+
         context = {
             'cert': self,
-            'logo_url': f"{settings.BASE_URL}{settings.STATIC_URL}assets/logo/image.png",
+            'qr_url': qr_url,
+            'bg_url': bg_url,
+            'font_url': font_url,  # html-shablon uchun to'g'ri nom
         }
-        html_string = render_to_string('labcerti/certificates/certificate_template.html', context)
-        pdf = HTML(string=html_string, base_url=settings.BASE_URL).write_pdf()
 
-        buffer = BytesIO(pdf)
-        buffer.seek(0)
+        html_string = render_to_string('labcerti/certificates/certificate_template.html', context)
+
+        result = BytesIO()
+        pisa_status = pisa.CreatePDF(
+            src=html_string,
+            dest=result,
+            encoding='utf-8',
+            link_callback=link_callback  # Mana bu yerda link_callback funksiyasini chaqirish kerak
+        )
+
+        if pisa_status.err:
+            raise Exception("PDF generatsiya qilishda xatolik!")
+
+        pdf_bytes = result.getvalue()
+        buffer = BytesIO(pdf_bytes)
         filename = f"certificate_{self.certificate_number}.pdf"
 
         file_obj = InMemoryUploadedFile(
-            file=buffer,
+            buffer,
             field_name='certificate_file',
             name=filename,
             content_type='application/pdf',
-            size=len(pdf),
+            size=len(pdf_bytes),
             charset=None
         )
 
         self.certificate_file.save(filename, file_obj, save=False)
-
-    def __str__(self):
-        return f"{self.certificate_number} ({self.get_status_display()})"
 
 
 class Reject(models.Model):
