@@ -29,17 +29,21 @@ def generate_qr_code(certificate):
 
 def generate_pdf(certificate, template_name='labcerti/certificates/certificate_template.html'):
     """HTML shablondan PDF yaratadi va InMemoryUploadedFile qaytaradi"""
-    font_path = os.path.join(settings.BASE_DIR, 'static/fonts/roboto/static/Roboto-Regular.ttf')
+    font_path = os.path.join(
+        settings.BASE_DIR, 'static/fonts/roboto/static/Roboto-Regular.ttf')
+    bg_image = f"{settings.BASE_DIR}/templates/images/bg.png"
 
     context = {
         "cert": certificate,
+        'bg_image': bg_image,
         "qr_url": certificate.qr_code_image.url if certificate.qr_code_image else None,
         "bg_url": settings.STATIC_URL + 'assets/img/bg5.png',
         "font_url": font_path,
     }
     html_string = render_to_string(template_name, context)
     pdf_buffer = BytesIO()
-    pisa_status = pisa.CreatePDF(src=html_string, dest=pdf_buffer, encoding='utf-8', link_callback=link_callback)
+    pisa_status = pisa.CreatePDF(
+        src=html_string, dest=pdf_buffer, encoding='utf-8', link_callback=link_callback)
     if pisa_status.err:
         raise Exception("PDF yaratishda xatolik yuz berdi!")
 
@@ -54,3 +58,4 @@ def generate_pdf(certificate, template_name='labcerti/certificates/certificate_t
         charset=None
     )
     return file_obj
+
