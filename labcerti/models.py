@@ -30,23 +30,25 @@ def validate_file_size(value):
     if value.size > limit:
         raise ValidationError('Fayl hajmi 5 MB dan oshmasligi kerak.')
 
+
 class ActiveUserProfileManager(models.Manager):
     def get_queryset(self):
         return super().get_queryset().filter(is_deleted=False)
 
 
 def link_callback(uri, rel):
+    """HTML-dagi URL'larni fayl tizimi yo'liga o'tkazadi."""
+    # Statik fayllar uchun
     if uri.startswith(settings.STATIC_URL):
         path = os.path.join(settings.STATIC_ROOT, uri.replace(settings.STATIC_URL, ""))
         return path
 
-    # Agar media fayllarining URL-lari boshqa domen yoki papkada bo'lsa, bu shartni qo'shing
-    if uri.startswith('/media/'):
-        path = os.path.join(settings.MEDIA_ROOT, uri.replace('/media/', ''))
+    # QR kod uchun (sizning maxsus papkangiz)
+    elif uri.startswith('/data/labcerti/'):
+        path = os.path.join(settings.DATA_LABCERTI_ROOT, uri.replace('/data/labcerti/', ""))
         return path
 
     return uri
-
 
 
 class UserProfile(models.Model):
@@ -88,18 +90,21 @@ class UserProfile(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.role}"
 
+
 class Organization(models.Model):
     name = models.CharField(max_length=255, unique=True)
     inn = models.CharField(max_length=15, unique=True)
     registrar = models.CharField(max_length=255, verbose_name="Ro'yxatdan o'tkazuvchi organ", blank=True, null=True)
-    registration_date = models.DateField(verbose_name="Davlat ro'yxatidan o'tkazilgan sana",  blank=True, null=True)
-    registration_number = models.CharField(max_length=255, verbose_name="Davlat ro'yxatidan o'tkazilgan raqami", blank=True, null=True)
+    registration_date = models.DateField(verbose_name="Davlat ro'yxatidan o'tkazilgan sana", blank=True, null=True)
+    registration_number = models.CharField(max_length=255, verbose_name="Davlat ro'yxatidan o'tkazilgan raqami",
+                                           blank=True, null=True)
     legal_form = models.CharField(max_length=255, verbose_name="Tashkiliy-huquqiy shakli", blank=True, null=True)
     ifut_code = models.CharField(max_length=255, verbose_name="IFUT kodi", blank=True, null=True)
     dbibt_code = models.CharField(max_length=255, verbose_name="DBIBT kodi", blank=True, null=True)
     small_business = models.BooleanField(verbose_name="Kichik tadbirkorlik sub'ektlariga mansubligi", default=False)
     status = models.CharField(max_length=255, verbose_name="Faollik holati", blank=True, null=True)
-    charter_fund = models.DecimalField(max_digits=15, decimal_places=2, verbose_name="lank=TrueUstav fondi", blank=True, null=True)
+    charter_fund = models.DecimalField(max_digits=15, decimal_places=2, verbose_name="lank=TrueUstav fondi", blank=True,
+                                       null=True)
     email = models.EmailField(max_length=255, blank=True, null=True, verbose_name="Elektron pochta manzili")
     phone = models.CharField(max_length=255, blank=True, null=True, verbose_name="Aloqa telefoni")
     mho_code = models.CharField(max_length=255, verbose_name="MHOBT kodi", blank=True, null=True)
@@ -111,36 +116,46 @@ class Organization(models.Model):
     def __str__(self):
         return self.name
 
+
 class Certificate(models.Model):
     STATUS_CHOICES = [
-        ('draft', 'Draft'), 
+        ('draft', 'Draft'),
         ('pending', 'Pending'),
         ('approved', 'Approved'),
         ('rejected', 'Rejected'),
     ]
 
     document_type = models.CharField(max_length=255, default='GUVOHNOMASI', verbose_name="Hujjat turi")
-    certificate_number = models.PositiveIntegerField(unique=True,verbose_name="Guvohnoma raqami")
+    certificate_number = models.PositiveIntegerField(unique=True, verbose_name="Guvohnoma raqami")
     comparison_date = models.DateField(verbose_name="Qiyoslash sanasi", blank=True, null=True)
     valid_until_date = models.DateField(verbose_name="Amal qilish muddati", blank=True, null=True)
     standards_used = models.TextField(verbose_name="Etalonlar va vositalar")
-    comparison_document = models.CharField(blank=True, null=True, verbose_name="qiyoslash bo'yicha xujjatning belgilanishi va nomlanishi")
-    service_provider_name = models.CharField(max_length=255, verbose_name="O'lchash vositalarini qiyoslagan metrologiya xizmatining nomi", default="Geodezik metrologiya xizmat markazi")
-    metrologist = models.ForeignKey("UserProfile",on_delete=models.SET_NULL,null=True,related_name="metrologist_certificates",verbose_name="Qiyoslovchi")
+    comparison_document = models.CharField(blank=True, null=True,
+                                           verbose_name="qiyoslash bo'yicha xujjatning belgilanishi va nomlanishi")
+    service_provider_name = models.CharField(max_length=255,
+                                             verbose_name="O'lchash vositalarini qiyoslagan metrologiya xizmatining nomi",
+                                             default="Geodezik metrologiya xizmat markazi")
+    metrologist = models.ForeignKey("UserProfile", on_delete=models.SET_NULL, null=True,
+                                    related_name="metrologist_certificates", verbose_name="Qiyoslovchi")
 
     owner = models.ForeignKey("Organization", on_delete=models.CASCADE, verbose_name="Egasi", blank=True, null=True)
-    owner_inn = models.PositiveIntegerField(unique=True,verbose_name="O'lchash vositalarining egasi - yuridik shaxs INNsi")
+    owner_inn = models.PositiveIntegerField(unique=True,
+                                            verbose_name="O'lchash vositalarining egasi - yuridik shaxs INNsi")
     owner_name = models.CharField(max_length=255, verbose_name="O'lchash vositalarining egasi - yuridik shaxs nomi")
 
-    manufacturer = models.CharField(max_length=255, verbose_name="O'lchash vositalarini tayyorlovchi (ishlab chiqaruvchi)")
-    origin_country = models.CharField(max_length=255, verbose_name="O'lchash vositalarining tayyorlovchi (ishlab chiqaruvchi) - import qiluvchi mamlakat")
-    measurement_range = models.CharField(max_length=255, verbose_name="o'lchash vositalari parametrlarining nomi, o'lchashlar")
+    manufacturer = models.CharField(max_length=255,
+                                    verbose_name="O'lchash vositalarini tayyorlovchi (ishlab chiqaruvchi)")
+    origin_country = models.CharField(max_length=255,
+                                      verbose_name="O'lchash vositalarining tayyorlovchi (ishlab chiqaruvchi) - import qiluvchi mamlakat")
+    measurement_range = models.CharField(max_length=255,
+                                         verbose_name="o'lchash vositalari parametrlarining nomi, o'lchashlar")
     error_limit = models.CharField(max_length=255, verbose_name="Xatolik chegaralari, aniqlik klassi")
     device_name = models.CharField(max_length=255, verbose_name="O'lchash vositasining nomi")
     device_serial_numbers = models.CharField(max_length=255, verbose_name="Zavod raqami")
-    comparison_methodology_doc = models.CharField(max_length=255, verbose_name="O'lchash vositalariga qo'yiladigan talablarni reglamentlovchi normativ xujjat belgilanishi va nomi")
+    comparison_methodology_doc = models.CharField(max_length=255,
+                                                  verbose_name="O'lchash vositalariga qo'yiladigan talablarni reglamentlovchi normativ xujjat belgilanishi va nomi")
 
-    status = models.CharField(max_length=20,choices=STATUS_CHOICES,default='pending', verbose_name="Holati")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name="Holati")
     protocol_file = models.FileField(
         upload_to='data/labcerti/protocols/',
         verbose_name="Protokol fayli",
@@ -152,11 +167,14 @@ class Certificate(models.Model):
         null=True
     )
 
-    certificate_file = models.FileField(upload_to='data/labcerti/certificates/', verbose_name="Sertifikat fayli", blank=True, null=True)
+    certificate_file = models.FileField(upload_to='data/labcerti/certificates/', verbose_name="Sertifikat fayli",
+                                        blank=True, null=True)
     qr_code_image = models.ImageField(upload_to='data/labcerti/qr_codes/', verbose_name="QR kod", blank=True, null=True)
 
-    created_by = models.ForeignKey("UserProfile",on_delete=models.SET_NULL,null=True,related_name="created_certificates",verbose_name="Yaratdi")
-    approved_by = models.ForeignKey("UserProfile",on_delete=models.SET_NULL,null=True,blank=True,related_name="approved_certificates",verbose_name="Tasdiqladi")
+    created_by = models.ForeignKey("UserProfile", on_delete=models.SET_NULL, null=True,
+                                   related_name="created_certificates", verbose_name="Yaratdi")
+    approved_by = models.ForeignKey("UserProfile", on_delete=models.SET_NULL, null=True, blank=True,
+                                    related_name="approved_certificates", verbose_name="Tasdiqladi")
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Yaratilgan sana")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Yangilangan sana")
@@ -262,9 +280,11 @@ class Reject(models.Model):
         on_delete=models.CASCADE,
         related_name='rejections'
     )
-    rejected_by = models.ForeignKey("UserProfile", on_delete=models.SET_NULL, null=True, blank=True,related_name="rejected_certificates", verbose_name="Rad etdi")
+    rejected_by = models.ForeignKey("UserProfile", on_delete=models.SET_NULL, null=True, blank=True,
+                                    related_name="rejected_certificates", verbose_name="Rad etdi")
     reason = models.TextField("Rad etish sababi")
     created_at = models.DateTimeField(auto_now_add=True)
+
     class Meta:
         verbose_name = "Rad etilgan sertifikat"
         verbose_name_plural = "Rad etilgan sertifikatlar"
@@ -273,9 +293,10 @@ class Reject(models.Model):
     def __str__(self):
         return f"{self.certificate} - {self.rejected_by} tomonidan rad etildi"
 
+
 class Document(models.Model):
     title = models.CharField("Sarlavha", max_length=255)
-    file = models.FileField("Fayl", upload_to='data/labcerti/documents/',)
+    file = models.FileField("Fayl", upload_to='data/labcerti/documents/', )
     uploaded_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

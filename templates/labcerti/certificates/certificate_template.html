@@ -1,218 +1,40 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-    <meta charset="UTF-8">
-    <title>Guvohnoma № {{ cert.certificate_number }}</title>
+    <title>Sertifikat</title>
     <style>
-        @font-face {
-            font-family: 'DejaVu Sans';
-            src: url('fonts/DejaVuSans.ttf'); /* Bu qatorni to'g'ri fayl yo'liga o'zgartiring! */
-        }
         @page {
             size: A4;
             margin: 0;
         }
 
+        @font-face {
+            font-family: 'DejaVu Sans';
+            src: url('{{ font_url }}');
+        }
+
         body {
+            font-family: "DejaVu Sans", sans-serif;
             margin: 0;
             padding: 0;
-            font-family: "DejaVu Sans", sans-serif;
-            font-size: 11px;
-            color: #000;
-        }
-
-        .certificate-container {
-            width: 210mm;
-            height: 297mm;
-            margin: 0 auto;
-            padding: 15mm;
-            box-sizing: border-box;
-            overflow: hidden;
-        }
-
-        .text-center { text-align: center; }
-        .text-right { text-align: right; }
-
-        .header-section {
-            text-align: center;
-        }
-
-        .header-section h3 {
-            font-weight: bold;
-            font-size: 16px;
-            margin: 0;
-            line-height: 1.2;
-            color: blue;
-        }
-
-        .title-section {
-            text-align: center;
-            margin-top: 15px;
-        }
-
-        .title-section p.number {
-            font-weight: bold;
-            font-size: 20px;
-            margin: 0;
-        }
-
-        .title-section h2 {
-            font-weight: bold;
-            font-size: 16px;
-            margin-bottom: 5px;
-            letter-spacing: 1px;
-        }
-
-        .title-section h1 {
-            font-weight: bolder;
-            font-size: 22px;
-            color: darkblue;
-            margin-bottom: 2px;
-            letter-spacing: 2px;
-        }
-
-        .subtitle {
-            font-size: 9px;
-            font-style: italic;
-            display: block;
-            margin-top: -5px;
-        }
-
-        .validity-section {
-            text-align: right;
-            margin-top: 20px;
-        }
-
-        .validity-section strong {
-            font-size: 14px;
-        }
-
-        .details-section {
-            margin-top: 20px;
-        }
-
-        .details-section p {
-            margin-bottom: 3px;
-            line-height: 1.5;
-        }
-
-        .details-section span {
-            font-weight: bold;
-        }
-
-        .details-section .line {
-            border-bottom: 1px solid black;
-            font-weight: bold;
-        }
-
-        .qr-section {
-            display: table;
-            width: 100%;
-            margin-top: 20px;
-        }
-
-        .qr-section .qr-cell {
-            display: table-cell;
-            vertical-align: bottom;
-            width: 50%;
-        }
-
-        .qr-section .sign-cell {
-            display: table-cell;
-            vertical-align: bottom;
-            width: 50%;
-            text-align: right;
-        }
-
-        .warning-section {
-            text-align: center;
-            margin-top: 10px;
-        }
-
-        .warning-section i {
-            font-size: 9px;
-            color: red;
-            font-weight: bold;
         }
     </style>
 </head>
 <body>
+
+    <img src="{{ bg_url }}" class="certificate-bg">
+
     <div class="certificate-container">
-        <div class="header-section">
-            <h3 style="color:blue">O‘ZBEKISTON RESPUBLIKASIDA O‘LCHASHLARNING YAGONA BIRLIKDA
-                <br> BO'LISHINI TA’MINLASH TIZIMI
-            </h3>
-        </div>
-
-        <div class="header-section" style="margin-top:15px;">
-            <h3 style="border-bottom: 1px solid black; display:inline-block; padding-bottom: 5px;">{{ cert.service_provider_name }}</h3>
-            <p class="subtitle">(o'lchash vositasini qiyoslashni o'tkazgan metrologiya xizmatining nomi)</p>
-        </div>
-
-        <div class="title-section">
-            <p class="number">{{ cert.certificate_number }} - son</p>
-            <h2>O‘lchash vositasini qiyoslash</h2>
-            <h1>GUVOHNOMASI</h1>
-        </div>
-
-        <div class="validity-section">
-            <p>Amal qilish muddati: <br>
-                <strong>{{ cert.valid_until_date|date:"Y" }}-yil {{ cert.valid_until_date|date:"d" }}-{{ cert.valid_until_date|date:"F" }}gacha</strong>
-            </p>
-        </div>
-
-        <div class="details-section">
-            <p>Ushbu guvohnoma <span class="line">{{ cert.standards_used }} </span> foydalangan holda
-                <span class="subtitle">(etalonlar (namunaviy o'lchash vositalari)ning belgilanishi va nomi, qiyoslangan sanasi)</span>
-            </p>
-            <p><span class="line">{{ cert.comparison_document }} </span> ga muvofiq
-                <span class="subtitle">(qiyoslash bo'yicha xujjatning belgilanishi va nomlanishi)</span>
-            </p>
-            <p><span class="line">{{ cert.service_provider_name }} </span> tomonidan qiyoslangan
-                <span class="subtitle">(o'lchash vositalarini qiyoslagan metrologiya xizmatining nomi)</span>
-            </p>
-            <p><span class="line">{{ cert.owner_name }}</span> ga tegishli
-                <span class="subtitle">(o'lchash vositalarining egasi - yuridik shaxs)</span>
-            </p>
-            <p><span class="line">{{ cert.manufacturer }} </span>
-                <span class="subtitle">(o'lchash vositalarini tayyorlovchi)</span>
-            </p>
-            <p><span class="line">{{ cert.origin_country }} </span> tomonidan tayyorlangan (import qilingan)
-                <span class="subtitle">(o'lchash vositalarining tayyorlovchi - import qiluvchi mamlakat)</span>
-            </p>
-            <p><span class="line">{{ cert.measurement_range }} </span>
-                <span class="subtitle">(o'lchash vositalari parametrlarining nomi, o'lchashlar)</span>
-            </p>
-            <p><span class="line">{{ cert.error_limit }} </span>
-                <span class="subtitle">xatolik chegaralari, aniqlik klassi</span>
-            </p>
-            <p><span class="line">{{ cert.device_name }} {{ cert.device_serial_numbers }} </span>
-                <span class="subtitle">(o'lchash vositalarining nomlanishi va belgilanishi, zavod raqami)</span>
-            </p>
-        </div>
-
-        <div class="qr-section">
-            <div class="qr-cell">
-                {% if qr_url %}
-                    <img src="{{ qr_url }}" alt="QR code" style="height: 80px; width: 80px;"/>
-                {% else %}
-                    <div style="height: 80px; width: 80px; border: 1px dashed gray; text-align: center; font-size: 10px; color: gray;">
-                        QR CODE JOY
-                    </div>
-                {% endif %}
-            </div>
-            <div class="sign-cell">
-                <p>Qiyoslash sanasi: <strong>{{ cert.comparison_date|date:"Y" }}-yil {{ cert.comparison_date|date:"d" }}-{{ cert.comparison_date|date:"F" }}</strong></p>
-                <p>Qiyoslovchi:  <strong>{{ cert.metrologist }} </strong></p>
-                <span class="subtitle">(F.I.SH.)</span>
-            </div>
-        </div>
-
-        <div class="warning-section">
-            <p>
-                <i>Mazkur guvohnomani qalbakilashtirish - qonunga muvofiq javobgarlikka tortiladi.</i>
-            </p>
+        <h1>This is a Heading</h1>
+        <p>This is a paragraph.</p>
+        <p>Рейки нивелирные инварные(TEST)</p>
+        a{{ qr_url }}
+        a{{ font_url }}
+         a{{ bg_url }}
+        <div class="qr-code">
+            <img src="{{ qr_url }}" alt="QR Code" style="width: 80px; height: 80px;">
         </div>
     </div>
+
 </body>
 </html>
