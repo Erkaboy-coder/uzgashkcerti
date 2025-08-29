@@ -9,12 +9,12 @@
         }
 
         @font-face {
-            font-family: 'DejaVu Sans';
+            font-family: 'Roboto';
             src: url('{{ font_url }}');
         }
 
         body {
-            font-family: "DejaVu Sans", sans-serif;
+            font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
         }
@@ -28,9 +28,10 @@
         <h1>This is a Heading</h1>
         <p>This is a paragraph.</p>
         <p>Рейки нивелирные инварные(TEST)</p>
-        a{{ qr_url }}
-        a{{ font_url }}
-         a{{ bg_url }}
+        qr - {{ qr_url }}<br>
+        font - {{ font_url }}
+        <br>
+         bg - {{ bg_url }}<br>
         <div class="qr-code">
             <img src="{{ qr_url }}" alt="QR Code" style="width: 80px; height: 80px;">
         </div>

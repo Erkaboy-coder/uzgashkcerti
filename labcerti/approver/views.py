@@ -14,8 +14,11 @@ from django.db import transaction
 import os
 from django.core.paginator import Paginator
 from datetime import timedelta
+from datetime import datetime
 from django.utils import timezone
 from django.http import HttpRequest
+from labcerti.helpers import generate_qr_code, generate_pdf
+from django.core.files.base import ContentFile
 
 @login_required
 def dashboard(request, status=None):
@@ -81,57 +84,113 @@ def dashboard(request, status=None):
 
 @login_required
 def approve_certificate(request, pk):
-    if request.method == "POST":
-        certificate = get_object_or_404(Certificate, pk=pk)
-        user_profile = get_object_or_404(UserProfile, user=request.user)
+    certificate = get_object_or_404(Certificate, pk=pk)
+    user_profile = request.user.userprofile
 
-        try:
-            with transaction.atomic():
-                if certificate.status == 'pending':
-                    certificate.status = 'approved'
+    try:
+        with transaction.atomic():
+            certificate.status = 'approved'
+            certificate.approved_by = user_profile
+            certificate.approved_at = datetime.now()
 
-                    # Tasdiqlashda comparison_date va valid_until_date set qilish
-                    if not certificate.comparison_date:
-                        certificate.comparison_date = timezone.now().date()
-                    certificate.valid_until_date = certificate.comparison_date + timedelta(days=365)
-
-                certificate.approved_by = user_profile
-                certificate.approved_at = timezone.now()
-
-                # Fayllar o'chirish va yaratish
-                if certificate.certificate_file:
-                    try:
-                        certificate.certificate_file.close()
+            # Avvalgi fayllarni o'chirish
+            if certificate.certificate_file:
+                try:
+                    certificate.certificate_file.close()
+                    gc.collect()
+                    if os.path.exists(certificate.certificate_file.path):
                         os.remove(certificate.certificate_file.path)
-                    except Exception as e:
-                        print("PDF faylini o'chirishda xato:", e)
+                except Exception:
+                    pass
 
-                if certificate.qr_code_image:
-                    try:
-                        certificate.qr_code_image.close()
+            if certificate.qr_code_image:
+                try:
+                    certificate.qr_code_image.close()
+                    gc.collect()
+                    if os.path.exists(certificate.qr_code_image.path):
                         os.remove(certificate.qr_code_image.path)
-                    except Exception as e:
-                        print("QR kod faylini o'chirishda xato:", e)
+                except Exception:
+                    pass
 
-                certificate.generate_qr_code()
-                certificate.generate_pdf_file(request)
+            # Yangi QR va PDF yaratish
+            qr_buffer = generate_qr_code(certificate)
+            certificate.qr_code_image.save(
+                f"qr_{certificate.certificate_number}.png",
+                ContentFile(qr_buffer.getvalue()),
+                save=False
+            )
 
-                certificate.save()
+            pdf_file = generate_pdf(certificate)
+            certificate.certificate_file.save(pdf_file.name, pdf_file, save=False)
 
+            certificate.save()
             messages.success(
                 request,
                 f"Sertifikat #{certificate.certificate_number} muvaffaqiyatli tasdiqlandi."
             )
 
-        except Exception as e:
-            print("XATO TUTILDI:", e)
-            print(traceback.format_exc())
-            messages.error(
-                request,
-                f"Sertifikatni tasdiqlashda xatolik yuz berdi: {e}"
-            )
+    except Exception as e:
+        messages.error(
+            request,
+            f"Sertifikatni tasdiqlashda xatolik yuz berdi: {e}"
+        )
 
     return redirect('approver:dashboard')
+
+
+# @login_required
+# def approve_certificate(request, pk):
+#     if request.method == "POST":
+#         certificate = get_object_or_404(Certificate, pk=pk)
+#         user_profile = get_object_or_404(UserProfile, user=request.user)
+#
+#         try:
+#             with transaction.atomic():
+#                 if certificate.status == 'pending':
+#                     certificate.status = 'approved'
+#
+#                     # Tasdiqlashda comparison_date va valid_until_date set qilish
+#                     if not certificate.comparison_date:
+#                         certificate.comparison_date = timezone.now().date()
+#                     certificate.valid_until_date = certificate.comparison_date + timedelta(days=365)
+#
+#                 certificate.approved_by = user_profile
+#                 certificate.approved_at = timezone.now()
+#
+#                 # Fayllar o'chirish va yaratish
+#                 if certificate.certificate_file:
+#                     try:
+#                         certificate.certificate_file.close()
+#                         os.remove(certificate.certificate_file.path)
+#                     except Exception as e:
+#                         print("PDF faylini o'chirishda xato:", e)
+#
+#                 if certificate.qr_code_image:
+#                     try:
+#                         certificate.qr_code_image.close()
+#                         os.remove(certificate.qr_code_image.path)
+#                     except Exception as e:
+#                         print("QR kod faylini o'chirishda xato:", e)
+#
+#                 certificate.generate_qr_code()
+#                 certificate.generate_pdf_file(request)
+#
+#                 certificate.save()
+#
+#             messages.success(
+#                 request,
+#                 f"Sertifikat #{certificate.certificate_number} muvaffaqiyatli tasdiqlandi."
+#             )
+#
+#         except Exception as e:
+#             print("XATO TUTILDI:", e)
+#             print(traceback.format_exc())
+#             messages.error(
+#                 request,
+#                 f"Sertifikatni tasdiqlashda xatolik yuz berdi: {e}"
+#             )
+#
+#     return redirect('approver:dashboard')
 
 
 

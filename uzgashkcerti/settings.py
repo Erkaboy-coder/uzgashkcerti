@@ -115,12 +115,12 @@ LOGIN_REDIRECT_URL = '/'
 
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-    # Barcha ilovalarning statik papkalarini qo'shing
-    # os.path.join(BASE_DIR, 'certificates/static'),
-]
-# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# Development va production uchun fayllar manzili
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # Sizning loyihangizdagi static papka
+
+# Collectstatic nusxalaydigan joy
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 
 DATA_LABCERTI_ROOT = 'data/labcerti/'
 DATA_CENTER_ROOT = 'data/centercerti/'
