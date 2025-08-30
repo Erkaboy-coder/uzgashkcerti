@@ -82,6 +82,10 @@ class UserProfile(models.Model):
     objects = models.Manager()  # default
     active_objects = ActiveUserProfileManager()  # faqat is_deleted=False
 
+    @property
+    def full_name(self):
+        return f"{self.user.first_name} {self.user.last_name}"
+    
     def delete(self, *args, **kwargs):
         """Soft delete – bazadan o‘chirib yubormaydi"""
         self.is_deleted = True

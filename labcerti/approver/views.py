@@ -3,15 +3,12 @@ from django.contrib.auth.decorators import login_required
 from labcerti.models import Certificate, UserProfile, Reject, Document
 from django.contrib import messages
 from django.db.models import Q
-from django.contrib import messages
 from django.template.loader import render_to_string
 from weasyprint import HTML
 from django.conf import settings
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
-import traceback
 from django.db import transaction
-import os
 from django.core.paginator import Paginator
 from datetime import timedelta
 from datetime import datetime
@@ -19,6 +16,8 @@ from django.utils import timezone
 from django.http import HttpRequest
 from labcerti.helpers import generate_qr_code, generate_pdf
 from django.core.files.base import ContentFile
+import os, gc, base64, requests
+import traceback
 
 @login_required
 def dashboard(request, status=None):
@@ -87,55 +86,144 @@ def approve_certificate(request, pk):
     certificate = get_object_or_404(Certificate, pk=pk)
     user_profile = request.user.userprofile
 
-    try:
-        with transaction.atomic():
-            certificate.status = 'approved'
-            certificate.approved_by = user_profile
-            certificate.approved_at = datetime.now()
+    if request.method == "POST":
+        try:
+            with transaction.atomic():
+                certificate.status = "approved"
+                certificate.approved_by = user_profile
+                certificate.approved_at = datetime.now()
 
-            # Avvalgi fayllarni o'chirish
-            if certificate.certificate_file:
-                try:
-                    certificate.certificate_file.close()
-                    gc.collect()
-                    if os.path.exists(certificate.certificate_file.path):
-                        os.remove(certificate.certificate_file.path)
-                except Exception:
-                    pass
+                # ---- Avvalgi fayllarni o‘chirish ----
+                if certificate.certificate_file:
+                    try:
+                        certificate.certificate_file.close()
+                        gc.collect()
+                        if os.path.exists(certificate.certificate_file.path):
+                            os.remove(certificate.certificate_file.path)
+                    except Exception:
+                        pass
 
-            if certificate.qr_code_image:
-                try:
-                    certificate.qr_code_image.close()
-                    gc.collect()
-                    if os.path.exists(certificate.qr_code_image.path):
-                        os.remove(certificate.qr_code_image.path)
-                except Exception:
-                    pass
+                if certificate.qr_code_image:
+                    try:
+                        certificate.qr_code_image.close()
+                        gc.collect()
+                        if os.path.exists(certificate.qr_code_image.path):
+                            os.remove(certificate.qr_code_image.path)
+                    except Exception:
+                        pass
 
-            # Yangi QR va PDF yaratish
-            qr_buffer = generate_qr_code(certificate)
-            certificate.qr_code_image.save(
-                f"qr_{certificate.certificate_number}.png",
-                ContentFile(qr_buffer.getvalue()),
-                save=False
-            )
+                # ---- API ga yuboriladigan payload ----
+                payload = {
+                    "certificate_number": certificate.certificate_number,
+                    "valid_until_date": str(certificate.valid_until_date),
+                    "standards_used": certificate.standards_used,
+                    "comparison_document": certificate.comparison_document,
+                    "service_provider_name": certificate.service_provider_name,
+                    "owner_name": certificate.owner_name,
+                    "manufacturer": certificate.manufacturer,
+                    "origin_country": certificate.origin_country,
+                    "measurement_range": certificate.measurement_range,
+                    "error_limit": certificate.error_limit,
+                    "device_name": certificate.device_name,
+                    "comparison_methodology_doc": certificate.comparison_methodology_doc,
+                    "comparison_date": str(certificate.comparison_date),
+                    "metrologist": str(certificate.metrologist.full_name) if str(certificate.metrologist) else "",
+                }
 
-            pdf_file = generate_pdf(certificate)
-            certificate.certificate_file.save(pdf_file.name, pdf_file, save=False)
+                resp = requests.post(
+                    "http://monitoring.dshk.uz/api/cer_genetarot/",
+                    json=payload,
+                    timeout=60,
+                )
 
-            certificate.save()
-            messages.success(
-                request,
-                f"Sertifikat #{certificate.certificate_number} muvaffaqiyatli tasdiqlandi."
-            )
+                if resp.status_code not in [200, 201]:
+                    raise Exception(f"API xatosi: {resp.status_code} - {resp.text}")
 
-    except Exception as e:
-        messages.error(
-            request,
-            f"Sertifikatni tasdiqlashda xatolik yuz berdi: {e}"
-        )
+                data = resp.json()
 
-    return redirect('approver:dashboard')
+                # ---- PDF va QR code’ni yozib qo‘yish ----
+                if "certificate_file" in data:
+                    pdf_bytes = base64.b64decode(data["certificate_file"])
+                    certificate.certificate_file.save(
+                        f"certificate_{certificate.certificate_number}.pdf",
+                        ContentFile(pdf_bytes),
+                        save=False,
+                    )
+
+                if "qr_code_image" in data:
+                    qr_bytes = base64.b64decode(data["qr_code_image"])
+                    certificate.qr_code_image.save(
+                        f"qr_{certificate.certificate_number}.png",
+                        ContentFile(qr_bytes),
+                        save=False,
+                    )
+
+                certificate.save()
+
+                messages.success(
+                    request,
+                    f"Sertifikat #{certificate.certificate_number} muvaffaqiyatli tasdiqlandi va saqlandi.",
+                )
+
+        except Exception as e:
+            messages.error(request, f"Sertifikatni tasdiqlashda xatolik: {e}")
+
+    return redirect("approver:dashboard")
+
+# @login_required
+# def approve_certificate(request, pk):
+#     certificate = get_object_or_404(Certificate, pk=pk)
+#     user_profile = request.user.userprofile
+
+#     try:
+#         with transaction.atomic():
+#             certificate.status = 'approved'
+#             certificate.approved_by = user_profile
+#             certificate.approved_at = datetime.now()
+
+#             # Avvalgi fayllarni o'chirish
+#             if certificate.certificate_file:
+#                 try:
+#                     certificate.certificate_file.close()
+#                     gc.collect()
+#                     if os.path.exists(certificate.certificate_file.path):
+#                         os.remove(certificate.certificate_file.path)
+#                 except Exception:
+#                     pass
+
+#             if certificate.qr_code_image:
+#                 try:
+#                     certificate.qr_code_image.close()
+#                     gc.collect()
+#                     if os.path.exists(certificate.qr_code_image.path):
+#                         os.remove(certificate.qr_code_image.path)
+#                 except Exception:
+#                     pass
+
+#             # Yangi QR va PDF yaratish
+#             qr_buffer = generate_qr_code(certificate)
+#             certificate.qr_code_image.save(
+#                 f"qr_{certificate.certificate_number}.png",
+#                 ContentFile(qr_buffer.getvalue()),
+#                 save=False
+#             )
+
+#             pdf_file = generate_pdf(certificate)
+#             certificate.certificate_file.save(pdf_file.name, pdf_file, save=False)
+
+#             certificate.save()
+#             messages.success(
+#                 request,
+#                 f"Sertifikat #{certificate.certificate_number} muvaffaqiyatli tasdiqlandi."
+#             )
+
+#     except Exception as e:
+#         messages.error(
+#             request,
+#             f"Sertifikatni tasdiqlashda xatolik yuz berdi: {e}"
+#         )
+
+#     return redirect('approver:dashboard')
 
 
 # @login_required
