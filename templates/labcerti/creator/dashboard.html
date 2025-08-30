@@ -8,13 +8,13 @@
 /* Yangi CSS qoidalari */
 .card-filter {
     cursor: pointer;
-    transition: 0.3s;
+    transition: transform 0.3s, box-shadow 0.3s;
     text-decoration: none;
     color: inherit;
-    display: flex; /* Flexbox qilib o'zgartirildi */
-    flex-direction: column; /* Kontentni vertikal joylashtirish */
+    display: flex;
+    flex-direction: column;
     border-radius: 0.5rem;
-    height: 100%; /* Balandlikni to'liq qilish */
+    height: 100%;
 }
 
 .card-filter:hover {
@@ -28,10 +28,11 @@
     background: #e3f2fd;
 }
 
+/* Bu qismni to'g'irladim */
 .card-body.d-flex {
     flex-grow: 1;
-    align-items: flex-start !important; /* Matn yuqoridan boshlansin */
-    justify-content: space-between !important; /* Bo'sh joyni teng taqsimlash */
+    align-items: center !important; /* Vertikal joylashuvni markazga o'tkazish */
+    justify-content: space-between !important;
 }
 
 .btn-create {
@@ -59,9 +60,9 @@
 /* Yangilangan matn uslubi */
 .card-body .text-xs {
     /* Eski text-xs uslubi o'rniga yangisi */
-    font-size: 0.9rem; /* Yaxshiroq o'qish uchun o'lcham kattalashtirildi */
-    white-space: normal; /* Matnning keyingi qatorga o'tishini ta'minlaydi */
-    word-break: break-word; /* Uzoq so'zlarni qismlarga bo'ladi */
+    font-size: 0.9rem;
+    white-space: normal;
+    word-break: break-word;
 }
 .card-body .h5 {
     font-size: 1.5rem;
@@ -162,7 +163,8 @@
 
 {% block extra_js %}
 <style>
+/* Bu qismni ham o'zgartirdim, chunki u yuqoridagi qoidalarni qayta yozgan */
 .card-filter { cursor: pointer; transition: 0.3s; }
-.card-filter.active { border: 2px solid #007bff; background: #f0f8ff; }
+.card-filter.active { border: 2px solid #007bff; background: #e3f2fd; }
 </style>
 {% endblock %}

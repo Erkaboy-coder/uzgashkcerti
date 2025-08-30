@@ -6,7 +6,7 @@
 {% block breadcrumb %}Guvohnoma tafsilotlari{% endblock %}
 
 {% block content %}
-    <style>
+<style>
     /*
     * Responsive va ixchamlashtirilgan CSS
     */
@@ -37,16 +37,54 @@
         line-height: 1.4;
     }
 
+    /* MATN JOYLASHTIRISH UCHUN YANGI CSS QOIDALAR */
     .certificate-text-block {
         text-align: center;
-        margin-bottom: 8px; /* Pastki bo'shliqlar biroz kamaytirildi */
+        margin-bottom: 8px;
     }
 
-    .certificate-text-block i {
+    .main-line-container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap; /* Matnning keyingi qatorga o'tishini ta'minlaydi */
+        justify-content: center;
+        align-items: flex-end;
+        text-align: center;
+        width: 100%;
+        margin-bottom: 5px; /* Pastki matndan ajratish uchun bo'shliq */
+    }
+
+    .main-line-container span {
+        font-size: clamp(0.65rem, 1.8vw, 0.9rem);
+        display: inline-block; /* Elementlarga kenglik berish uchun */
+        white-space: normal; /* Matnning o'z-o'zidan qatorga o'tishiga ruxsat beradi */
+        word-break: break-word; /* Uzoq so'zlarni qismlarga bo'ladi */
+    }
+
+    /* Faqat chiziq ostida bo'lishi kerak bo'lgan matnlar uchun */
+    .main-line-container .main-text {
+        border-bottom: 1px solid black;
+        padding-bottom: 2px;
+        flex-grow: 1;
+        text-align: center;
+        margin: 0 5px;
+        font-weight: bold;
+    }
+
+    /* "foydalangan holda" kabi so'zlar uchun maxsus qoida */
+    .main-line-container .end-text {
+        flex-shrink: 0; /* Bo'shliq kamayganda qisqarmaydi */
+        margin-left: auto; /* O'ng tomonga surib yuboradi */
+    }
+
+    .info-line {
         display: block;
+        font-style: italic;
         font-size: clamp(0.55rem, 1.3vw, 0.75rem);
         margin-top: 3px;
+        text-align: center;
     }
+    /* YANGI CSS QOIDALARI TUGADI */
 
     .validity-period {
         text-align: right;
@@ -57,7 +95,7 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-end;
-        margin-top: 20px; /* Yuqori bo'shliq kamaytirildi */
+        margin-top: 20px;
     }
 
     .certificate-footer-info {
@@ -66,14 +104,14 @@
     }
 
     .qr-code-area {
-        height: 80px; /* QR kod o'lchami kichraytirildi */
+        height: 80px;
         width: 80px;
     }
 
     /* Kichik ekranlar uchun sozlamalar */
     @media (max-width: 768px) {
         .certificate-container {
-            padding: 10px; /* Kichik ekranlarda ichki bo'shliq kamaytirildi */
+            padding: 10px;
         }
 
         .certificate-footer {
@@ -88,18 +126,17 @@
         }
     }
 </style>
-<div class="row">
 
+<div class="row">
     <div class="col-lg-{% if rejections %}9{% else %}12{% endif %} col-md-{% if rejections %}8{% else %}12{% endif %}">
         <div class="card shadow-lg border-0 rounded-4">
-
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fas fa-certificate me-2"></i>Guvohnoma {{ cert.certificate_number }}</h5>
                 <a href="{% url 'creator:dashboard' %}" class="btn btn-light btn-sm shadow-sm rounded-3">
                     <i class="fas fa-arrow-left me-1"></i> Orqaga
                 </a>
             </div>
-            
+
             <div class="card-body p-4">
                 <div class="certificate-container">
                     <div class="text-center text-primary mb-2">
@@ -123,47 +160,85 @@
 
                     <div class="certificate-main-content mt-4">
                         <div class="certificate-text-block">
-                            <span>Ushbu guvohnoma <span class="fw-bold border-bottom border-dark">{{ cert.standards_used }}</span> foydalangan holda</span>
-                            <i class="d-block">(etalonlar (namunaviy o'lchash vositalari)ning belgilanishi va nomi, qiyoslangan sanasi)</i>
+                            <div class="main-line-container">
+                                <span class="main-text">Ushbu guvohnoma {{ cert.standards_used }} </span>
+                                <span class="end-text">foydalangan holda</span>
+                            </div>
+                            <i class="info-line">(etalonlar (namunaviy o'lchash vositalari)ning belgilanishi va nomi, qiyoslangan sanasi)</i>
                         </div>
+                        
                         <div class="certificate-text-block">
-                            <span><span class="fw-bold">{{ cert.comparison_document }}</span> ga muvofiq</span>
-                            <i class="d-block border-top border-dark mt-1 pt-1">(qiyoslash bo'yicha xujjatning belgilanishi va nomlanishi)</i>
+                            <div class="main-line-container">
+                                <span class="main-text">{{ cert.comparison_document }}</span>
+                                <span class="end-text">ga muvofiq</span>
+                            </div>
+                            <i class="info-line">(qiyoslash bo'yicha xujjatning belgilanishi va nomlanishi)</i>
                         </div>
+                        
                         <div class="certificate-text-block">
-                            <span><span class="fw-bold">{{ cert.service_provider_name }}</span> tomonidan qiyoslangan</span>
-                            <i class="d-block border-top border-dark mt-1 pt-1">(o'lchash vositalarini qiyoslagan metrologiya xizmatining nomi)</i>
+                            <div class="main-line-container">
+                                <span class="main-text">{{ cert.service_provider_name }}</span>
+                                <span class="end-text">tomonidan qiyoslangan</span>
+                            </div>
+                            <i class="info-line">(o'lchash vositalarini qiyoslagan metrologiya xizmatining nomi)</i>
                         </div>
+                        
                         <div class="certificate-text-block">
-                            <span><span class="fw-bold">{{ cert.owner_name }}</span> ga tegishli</span>
-                            <i class="d-block border-top border-dark mt-1 pt-1">(o'lchash vositalarining egasi - yuridik shaxs)</i>
+                            <div class="main-line-container">
+                                <span class="main-text">{{ cert.owner_name }}</span>
+                                <span class="end-text">ga tegishli</span>
+                            </div>
+                            <i class="info-line">(o'lchash vositalarining egasi - yuridik shaxs)</i>
                         </div>
+                        
                         <div class="certificate-text-block">
-                            <span><span class="fw-bold">{{ cert.manufacturer }}</span></span>
-                            <i class="d-block border-top border-dark mt-1 pt-1">(o'lchash vositalarini tayyorlovchi)</i>
+                            <div class="main-line-container">
+                                <span class="main-text">{{ cert.manufacturer }}</span>
+                                <span class="end-text"></span>
+                            </div>
+                            <i class="info-line">(o'lchash vositalarini tayyorlovchi)</i>
                         </div>
+                        
                         <div class="certificate-text-block">
-                            <span><span class="fw-bold">{{ cert.origin_country }}</span> tomonidan tayyorlangan (import qilingan)</span>
-                            <i class="d-block border-top border-dark mt-1 pt-1">(o'lchash vositalarining tayyorlovchi - import qiluvchi mamlakat)</i>
+                            <div class="main-line-container">
+                                <span class="main-text">{{ cert.origin_country }}</span>
+                                <span class="end-text">tomonidan tayyorlangan (import qilingan)</span>
+                            </div>
+                            <i class="info-line">(o'lchash vositalarining tayyorlovchi - import qiluvchi mamlakat)</i>
                         </div>
+                        
                         <div class="certificate-text-block">
-                            <span><span class="fw-bold">{{ cert.measurement_range }}</span></span>
-                            <i class="d-block border-top border-dark mt-1 pt-1">(o'lchash vositalari parametrlarining nomi, o'lchashlar,</i>
+                            <div class="main-line-container">
+                                <span class="main-text">{{ cert.measurement_range }}</span>
+                                <span class="end-text"></span>
+                            </div>
+                            <i class="info-line">(o'lchash vositalari parametrlarining nomi, o'lchashlar,</i>
                         </div>
-                        <div class="certificate-text-block">
-                            <span><span class="fw-bold">{{ cert.error_limit }}</span> metrologik tavsifli</span>
-                            <i class="d-block border-top border-dark mt-1 pt-1">xatolik chegaralari, aniqlik klassi)</i>
-                        </div>
-                        <div class="certificate-text-block">
-                            <span><span class="fw-bold">{{ cert.device_name }} {{ cert.device_serial_numbers }}</span> o'lchash vositasi</span>
-                            <i class="d-block border-top border-dark mt-1 pt-1">(o'lchash vositalarining nomlanishi va belgilanishi, zavod raqami)</i>
-                        </div>
-                        <div class="certificate-text-block">
-                            <span><span class="fw-bold">{{ cert.comparison_methodology_doc }}</span></span>
-                            <i class="d-block border-top border-dark mt-1 pt-1">(o'lchash vositalariga qo'yiladigan talablarni reglamentlovchi normativ xujjat belgilanishi va nomi)</i>
-                        </div>
-                    
 
+                        <div class="certificate-text-block">
+                            <div class="main-line-container">
+                                <span class="main-text">{{ cert.error_limit }}</span>
+                                <span class="end-text">metrologik tavsifli</span>
+                            </div>
+                            <i class="info-line">xatolik chegaralari, aniqlik klassi)</i>
+                        </div>
+                        
+                        <div class="certificate-text-block">
+                            <div class="main-line-container">
+                                <span class="main-text">{{ cert.device_name }} {{ cert.device_serial_numbers }}</span>
+                                <span class="end-text">o'lchash vositasi</span>
+                            </div>
+                            <i class="info-line">(o'lchash vositalarining nomlanishi va belgilanishi, zavod raqami)</i>
+                        </div>
+                        
+                        <div class="certificate-text-block">
+                            <div class="main-line-container">
+                                <span class="main-text">{{ cert.comparison_methodology_doc }}</span>
+                                <span class="end-text"></span>
+                            </div>
+                            <i class="info-line">(o'lchash vositalariga qo'yiladigan talablarni reglamentlovchi normativ xujjat belgilanishi va nomi)</i>
+                        </div>
+                        
                         <div class="text-left fw-bold">
                             <span>talablariga moslig va davlat metrologik tekshiruvi va nazorati tatbiq etilish sohasida qo'llanishiga yo'l qo'yilishini tasdiqlaydi.</span>
                         </div>
